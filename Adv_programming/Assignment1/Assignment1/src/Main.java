@@ -1,3 +1,5 @@
+import org.w3c.dom.ls.LSOutput;
+
 import java.util.Scanner;
 
 //TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
@@ -17,8 +19,8 @@ public class Main {
             switch (choice){
                 case 1:
                     System.out.println("*** Showing All Devices ***");
-                    fan.showStatus();
                     light.showStatus();
+                    fan.showStatus();
                     break;
                 case 2:
                     System.out.print("\nWhich device do you want to turn ON: ");
@@ -29,6 +31,59 @@ public class Main {
                         fan.turnOn();
                     } else {
                         System.out.println("Invalid device name. Please enter 'Light' or 'Fan'.");
+                    }
+                    break;
+                case 3:
+                    System.out.print("\nWhich device do you want to turn OFF: ");
+                    String deviceOFF = input.nextLine().trim();
+                    if (deviceOFF.equalsIgnoreCase("Light")) {
+                        light.turnOff();
+                    } else if (deviceOFF.equalsIgnoreCase("Fan")) {
+                        fan.turnOff();
+                    } else {
+                        System.out.println("Invalid device name. Please enter 'Light' or 'Fan'.");
+                    }
+                    break;
+                case 4:
+                    System.out.print("\nWhich device do you want to adjust: ");
+                    String deviceAdjust = input.nextLine().trim();
+                    if (deviceAdjust.equalsIgnoreCase("Light")) {
+                        // light is off
+                        if(!light.status) {
+                            light.showStatus();
+                            System.out.print("Do you want to turn on Light (Y/N))?: ");
+                            String yOrN = input.nextLine().trim();
+                            if(yesNo(yOrN)){
+                                if(yOrN.equalsIgnoreCase("Y") || yOrN.equalsIgnoreCase("YES")) {
+                                    light.turnOn();
+                                }else if(yOrN.equalsIgnoreCase("N")|| yOrN.equalsIgnoreCase("NO")) {
+                                    System.out.println("Adjusting Unsuccessful!!! ");
+                                    break;
+                                }
+                            }
+                        }
+                        //after light turn on
+                            System.out.print("Enter brightness level [1, 10]:");
+                            int brightnessLevel = input.nextInt();
+                            light.setBrightness(brightnessLevel);
+                    }else if (deviceAdjust.equalsIgnoreCase("Fan")) {
+                        if(!fan.status) {
+                            fan.showStatus();
+                            System.out.print("Do you want to turn on Fan (Y/N))?: ");
+                            String yOrN = input.nextLine().trim();
+                            if(yesNo(yOrN)){
+                                if(yOrN.equalsIgnoreCase("Y") || yOrN.equalsIgnoreCase("YES")) {
+                                    fan.turnOn();
+                                }else if(yOrN.equalsIgnoreCase("N")|| yOrN.equalsIgnoreCase("NO")) {
+                                    System.out.println("Adjusting Unsuccessful!!! ");
+                                    break;
+                                }
+                            }
+                        }
+                        // after fan turn on
+                        System.out.print("Enter speed level [1, 5]:");
+                        int speedLevel = input.nextInt();
+                        fan.setSpeed(speedLevel);
                     }
                     break;
                 case 5:
@@ -42,11 +97,17 @@ public class Main {
 
     public static void showMenu(){
         System.out.println("\nChoose an option:");
-        System.out.println("1. Show all devices");
-        System.out.println("2. Turn ON device");
-        System.out.println("3. Turn OFF device");
-        System.out.println("4. Adjust Light brightness");
+        System.out.println("1. Show all Devices");
+        System.out.println("2. Turn ON Device");
+        System.out.println("3. Turn OFF Device");
+        System.out.println("4. Adjust Device");
         System.out.println("5. Exit");
         System.out.print("Choose an option: ");
     }
+    public static boolean yesNo(String message){
+        if(message.equalsIgnoreCase("Y") || message.equalsIgnoreCase("YES")
+                || message.equalsIgnoreCase("N") || message.equalsIgnoreCase("NO")) {
+        return true;}
+        return false;
     }
+}

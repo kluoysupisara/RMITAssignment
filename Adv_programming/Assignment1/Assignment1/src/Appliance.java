@@ -35,4 +35,7 @@ public abstract class Appliance implements SmartDevice{
         System.out.printf("%s : %s%n", name, status?"ON":"OFF");
 
     }
+
+
+
 }
