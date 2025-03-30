@@ -14,8 +14,7 @@ public class Main {
         System.out.println("Welcome to Smart Home Automation System!");
         System.out.println("=".repeat(70));
         Scanner input = new Scanner(System.in);
-        //Fan fan = new Fan("Fan");
-        //Light light = new Light("Light");
+
         while(true){
             showMenu();
             int choice = input.nextInt();
@@ -23,25 +22,36 @@ public class Main {
 
             switch (choice){
                 case 1:
-                    if (devices.isEmpty()) {
-                        System.out.println("No devices found.");
-                        break;
-                    }
                     System.out.println("*** Showing All Devices ***");
                     for (Appliance device : devices.values()) {
                         device.showStatus();
                     }
                     break;
                 case 2:
-                    turnOnDevice(input);
+                    if (devices.isEmpty()) {
+                        System.out.println("You do not have any devices now.");
+                    }
+                    else{
+                        turnOnDevice(input);
+                    }
+                    break;
                 case 3:
-                    turnOffDevice(input);
+                    if (devices.isEmpty()) {
+                        System.out.println("You do not have any devices now.");
+                    }
+                    else{
+                        turnOffDevice(input);
+                    }
+                    break;
                 case 4:
                     adjustDevice(input);
+                    break;
                 case 5:
                     addDevice(input);
+                    break;
                 case 6:
                     removeDevice(input);
+                    break;
                 case 7:
                     System.out.println("Goodbye!");
                     input.close();
@@ -66,10 +76,11 @@ public class Main {
 
     private static void turnOnDevice(Scanner input){
         System.out.print("\nWhich device do you want to turn ON: ");
-        String deviceOn = input.nextLine().toLowerCase().trim();
+        String deviceOn = input.nextLine().trim().toLowerCase();
+        //System.out.println("deviceOn: " + deviceOn);
         Appliance device = devices.get(deviceOn);
         if (device == null) {
-            System.out.println("You do not have any devices now.");
+            System.out.println("No device found.");
         }else {
             device.turnOn();
         }
@@ -77,10 +88,10 @@ public class Main {
 
     private static void turnOffDevice(Scanner input){
         System.out.print("\nWhich device do you want to turn OFF: ");
-        String deviceOFF = input.nextLine().trim();
+        String deviceOFF = input.nextLine().trim().toLowerCase();
         Appliance device = devices.get(deviceOFF);
         if (device == null) {
-            System.out.println("You do not have any devices now.");
+            System.out.println("No device found.");
         }else {
             device.turnOff();
         }
