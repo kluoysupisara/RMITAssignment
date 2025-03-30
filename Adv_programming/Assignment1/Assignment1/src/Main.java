@@ -1,92 +1,49 @@
 import org.w3c.dom.ls.LSOutput;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Scanner;
 
 //TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
 // click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
 public class Main {
+    private static final Map<String, Appliance> devices = new HashMap<>();
+
     public static void main(String[] args) {
         System.out.println("=".repeat(70));
         System.out.println("Welcome to Smart Home Automation System!");
         System.out.println("=".repeat(70));
         Scanner input = new Scanner(System.in);
-        Fan fan = new Fan("Fan");
-        Light light = new Light("Light");
+        //Fan fan = new Fan("Fan");
+        //Light light = new Light("Light");
         while(true){
             showMenu();
             int choice = input.nextInt();
             input.nextLine(); //Assume newline character
+
             switch (choice){
                 case 1:
+                    if (devices.isEmpty()) {
+                        System.out.println("No devices found.");
+                        break;
+                    }
                     System.out.println("*** Showing All Devices ***");
-                    light.showStatus();
-                    fan.showStatus();
+                    for (Appliance device : devices.values()) {
+                        device.showStatus();
+                    }
                     break;
                 case 2:
-                    System.out.print("\nWhich device do you want to turn ON: ");
-                    String deviceOn = input.nextLine().trim();
-                    if (deviceOn.equalsIgnoreCase("Light")) {
-                        light.turnOn();
-                    } else if (deviceOn.equalsIgnoreCase("Fan")) {
-                        fan.turnOn();
-                    } else {
-                        System.out.println("Invalid device name. Please enter 'Light' or 'Fan'.");
-                    }
-                    break;
+                    turnOnDevice(input);
                 case 3:
-                    System.out.print("\nWhich device do you want to turn OFF: ");
-                    String deviceOFF = input.nextLine().trim();
-                    if (deviceOFF.equalsIgnoreCase("Light")) {
-                        light.turnOff();
-                    } else if (deviceOFF.equalsIgnoreCase("Fan")) {
-                        fan.turnOff();
-                    } else {
-                        System.out.println("Invalid device name. Please enter 'Light' or 'Fan'.");
-                    }
-                    break;
+                    turnOffDevice(input);
                 case 4:
-                    System.out.print("\nWhich device do you want to adjust: ");
-                    String deviceAdjust = input.nextLine().trim();
-                    if (deviceAdjust.equalsIgnoreCase("Light")) {
-                        // light is off
-                        if(!light.status) {
-                            light.showStatus();
-                            System.out.print("Do you want to turn on Light (Y/N))?: ");
-                            String yOrN = input.nextLine().trim();
-                            if(yesNo(yOrN)){
-                                if(yOrN.equalsIgnoreCase("Y") || yOrN.equalsIgnoreCase("YES")) {
-                                    light.turnOn();
-                                }else if(yOrN.equalsIgnoreCase("N")|| yOrN.equalsIgnoreCase("NO")) {
-                                    System.out.println("Adjusting Unsuccessful!!! ");
-                                    break;
-                                }
-                            }
-                        }
-                        //after light turn on
-                            System.out.print("Enter brightness level [1, 10]:");
-                            int brightnessLevel = input.nextInt();
-                            light.setBrightness(brightnessLevel);
-                    }else if (deviceAdjust.equalsIgnoreCase("Fan")) {
-                        if(!fan.status) {
-                            fan.showStatus();
-                            System.out.print("Do you want to turn on Fan (Y/N))?: ");
-                            String yOrN = input.nextLine().trim();
-                            if(yesNo(yOrN)){
-                                if(yOrN.equalsIgnoreCase("Y") || yOrN.equalsIgnoreCase("YES")) {
-                                    fan.turnOn();
-                                }else if(yOrN.equalsIgnoreCase("N")|| yOrN.equalsIgnoreCase("NO")) {
-                                    System.out.println("Adjusting Unsuccessful!!! ");
-                                    break;
-                                }
-                            }
-                        }
-                        // after fan turn on
-                        System.out.print("Enter speed level [1, 5]:");
-                        int speedLevel = input.nextInt();
-                        fan.setSpeed(speedLevel);
-                    }
-                    break;
+                    adjustDevice(input);
                 case 5:
+                    addDevice(input);
+                case 6:
+                    removeDevice(input);
+                case 7:
+                    System.out.println("Goodbye!");
                     input.close();
                     return;
             }
@@ -95,19 +52,99 @@ public class Main {
 
     }
 
-    public static void showMenu(){
+    private static void showMenu() {
         System.out.println("\nChoose an option:");
-        System.out.println("1. Show all Devices");
+        System.out.println("1. Show All Devices");
         System.out.println("2. Turn ON Device");
         System.out.println("3. Turn OFF Device");
         System.out.println("4. Adjust Device");
-        System.out.println("5. Exit");
-        System.out.print("Choose an option: ");
+        System.out.println("5. Add a Device");
+        System.out.println("6. Remove a Device");
+        System.out.println("7. Exit");
+        System.out.print("Please select: ");
     }
-    public static boolean yesNo(String message){
-        if(message.equalsIgnoreCase("Y") || message.equalsIgnoreCase("YES")
-                || message.equalsIgnoreCase("N") || message.equalsIgnoreCase("NO")) {
-        return true;}
-        return false;
+
+    private static void turnOnDevice(Scanner input){
+        System.out.print("\nWhich device do you want to turn ON: ");
+        String deviceOn = input.nextLine().toLowerCase().trim();
+        Appliance device = devices.get(deviceOn);
+        if (device == null) {
+            System.out.println("You do not have any devices now.");
+        }else {
+            device.turnOn();
+        }
+    }
+
+    private static void turnOffDevice(Scanner input){
+        System.out.print("\nWhich device do you want to turn OFF: ");
+        String deviceOFF = input.nextLine().trim();
+        Appliance device = devices.get(deviceOFF);
+        if (device == null) {
+            System.out.println("You do not have any devices now.");
+        }else {
+            device.turnOff();
+        }
+    }
+
+    private static void adjustDevice(Scanner input){
+        System.out.print("\nWhich device do you want to adjust: ");
+        String deviceAdjust = input.nextLine().trim();
+        Appliance device = devices.get(deviceAdjust);
+
+        if (!device.status) {
+            device.showStatus();
+            System.out.print("Do you want to turn on Light (Y/N))?: ");
+            String yOrN = input.nextLine().trim();
+            if (yOrN.equalsIgnoreCase("Y") || yOrN.equalsIgnoreCase("YES")) {
+                device.turnOn();
+            } else {
+                System.out.println("Adjusting Unsuccessful!!! ");
+            }
+        }
+        if (device instanceof Light light) {
+            System.out.print("Enter brightness level [1, 10]: ");
+            int brightnessLevel = input.nextInt();
+            light.setBrightness(brightnessLevel);
+        } else if (device instanceof Fan fan) {
+            System.out.print("Enter speed level [1, 5]: ");
+            int speedLevel = input.nextInt();
+            fan.setSpeed(speedLevel);
+        }
+    }
+    private static void addDevice(Scanner input){
+        System.out.print("Enter device type (Light/Fan): ");
+        String type = input.nextLine().trim();
+
+        System.out.print("Enter device name: ");
+        String name = input.nextLine().trim();
+
+        if (devices.containsKey(name.toLowerCase())) {
+            System.out.println("The device cannot be added because it already exists in the system.");
+            return;
+        }
+
+        Appliance newDevice;
+        if (type.equalsIgnoreCase("Light")) {
+            newDevice = new Light(name);
+        } else if (type.equalsIgnoreCase("Fan")) {
+            newDevice = new Fan(name);
+        } else {
+            System.out.println("Invalid device type! Please enter 'Light' or 'Fan'.");
+            return;
+        }
+
+        devices.put(name.toLowerCase(), newDevice);
+        System.out.println(name + " has been added to the system.");
+    }
+
+    private static void removeDevice(Scanner input) {
+        System.out.print("Which device do you want to remove: ");
+        String name = input.nextLine().trim().toLowerCase();
+
+        if (devices.remove(name) != null) {
+            System.out.println(name + " has been removed from the system.");
+        } else {
+            System.out.println("Sorry! This device does not exist in the system.");
+        }
     }
 }
