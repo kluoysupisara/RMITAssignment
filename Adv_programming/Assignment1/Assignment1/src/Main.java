@@ -56,7 +56,10 @@ public class Main {
                     System.out.println("Goodbye!");
                     input.close();
                     return;
+                default:
+                    System.out.println("Invalid choice.");
             }
+
 
         }
 
