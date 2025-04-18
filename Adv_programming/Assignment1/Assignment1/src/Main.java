@@ -105,6 +105,11 @@ public class Main {
         String deviceAdjust = input.nextLine().trim();
         Appliance device = devices.get(deviceAdjust);
 
+        if (device == null) {
+            System.out.println("No device found.");
+            return;
+        }
+
         if (!device.status) {
             device.showStatus();
             System.out.print("Do you want to turn on Light (Y/N))?: ");
