@@ -68,7 +68,7 @@ public class EventDao {
         DayOfWeek today = LocalDate.now().getDayOfWeek(); // MONDAY, etc.
         String[] allDays = {"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"};
         int index = today.getValue() - 1; // Convert MONDAY=1 to index=0
-        return Arrays.asList(Arrays.copyOfRange(allDays, index, allDays.length));
+        return Arrays.asList(Arrays.copyOfRange(allDays, index, allDays.length)); // [Friday, Sat, Sun]
     }
 
     public List<Event> getUpComingEvents() throws SQLException {
@@ -89,7 +89,7 @@ public class EventDao {
             System.out.println("query: " + query);
 
             ResultSet rs = stmt.executeQuery(query);
-            System.out.println("rs size: "+ rs.toString());;
+            //System.out.println("rs size: "+ rs.toString());;
 
             while (rs.next()) {
                 int total = rs.getInt("total");

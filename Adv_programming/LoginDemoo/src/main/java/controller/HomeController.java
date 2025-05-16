@@ -6,9 +6,12 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -113,20 +116,24 @@ public class HomeController {
 					{
 						btn.setOnAction((ActionEvent event) -> {
 							Event selectedEvent = getTableView().getItems().get(getIndex());
-							openBookingStage(selectedEvent);
+							//openBookingStage(selectedEvent);
 						});
 						btn.setStyle("-fx-background-color: #2a9df4; -fx-text-fill: white;");
 					}
 
-					@Override
-					public void updateItem(Void item, boolean empty) {
-						super.updateItem(item, empty);
-						if (empty) {
-							setGraphic(null);
-						} else {
-							setGraphic(btn);
-						}
+			@Override
+			public void updateItem(Void item, boolean empty) {
+				super.updateItem(item, empty);
+				if (empty) {
+					setGraphic(null);
+				} else {
+					HBox box = new HBox(btn);
+					box.setAlignment(Pos.CENTER); // Centers the button
+					//box.setPadding(new Insets(5));
+					setGraphic(box);
+				}
 					}
+
 				};
 			}
 		};
