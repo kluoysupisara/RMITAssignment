@@ -11,6 +11,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class EventDao {
     private final String TABLE_NAME = "events";
@@ -72,22 +73,29 @@ public class EventDao {
 
     public List<Event> getUpComingEvents() throws SQLException {
         List<Event> events = new ArrayList<>();
-        String query = "SELECT * FROM " + TABLE_NAME;
+
 
         try (Connection conn = Database.getConnection();
              Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(query)) {
+             ) {
+
 
             List<String> validDays = getValidDays();
+            String inClause = validDays.stream()
+                    .map(day -> "'" + day.trim() + "'")
+                    .collect(Collectors.joining(", "));
+
+            String query = "SELECT * FROM " + TABLE_NAME + " WHERE day IN (" + inClause +" )";
+            System.out.println("query: " + query);
+
+            ResultSet rs = stmt.executeQuery(query);
+            System.out.println("rs size: "+ rs.toString());;
 
             while (rs.next()) {
-                String day = rs.getString("day");
-                if (!validDays.contains(day)) continue;
-
                 int total = rs.getInt("total");
                 int sold = rs.getInt("sold");
                 int available = total - sold;
-
+                String day = rs.getString("day");
                 Event event = new Event(
                         rs.getString("eventName"),
                         rs.getString("venue"),
