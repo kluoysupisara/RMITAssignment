@@ -10,12 +10,11 @@ public class Model {
 	private UserDao userDao;
 	private User currentUser;
 	private EventDao eventDao;
-	private Cart cart;
+	private ShoppingCart shoppingCart;
 	
 	public Model() {
 		userDao = new UserDaoImpl();
 		eventDao = new EventDao();
-		cart = new Cart();
 	}
 	
 	public void setup() throws SQLException {
@@ -31,9 +30,11 @@ public class Model {
 	}
 	
 	public void setCurrentUser(User user) {
+
 		currentUser = user;
+		this.shoppingCart = new ShoppingCart(); // Initailze cart when user login
 	}
-	public Cart getCart() {
-		return cart;
+	public ShoppingCart getShoppingCart() {
+		return shoppingCart;
 	}
 }

@@ -97,6 +97,7 @@ public class EventDao {
                 int available = total - sold;
                 String day = rs.getString("day");
                 Event event = new Event(
+                        rs.getInt("id"),
                         rs.getString("eventName"),
                         rs.getString("venue"),
                         day,

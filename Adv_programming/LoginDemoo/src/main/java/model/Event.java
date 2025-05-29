@@ -1,6 +1,7 @@
 package model;
 
 public class Event {
+    private int id;
     private String eventName;
     private String venue;
     private String day;
@@ -10,7 +11,8 @@ public class Event {
     private int availableTickets;
 
 
-    public Event(String eventName, String venue, String day, double price, int soldTickets, int totalTickets, int availableTickets) {
+    public Event(int id, String eventName, String venue, String day, double price, int soldTickets, int totalTickets, int availableTickets) {
+        this.id = id;
         this.eventName = eventName;
         this.venue = venue;
         this.day = day;
@@ -20,6 +22,9 @@ public class Event {
         this.availableTickets = availableTickets;
     }
 
+    public int getId() {
+        return id;
+    }
     public String getEventName() {
         return eventName;
     }

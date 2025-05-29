@@ -108,7 +108,7 @@ public class LoginController {
 	}
 
 	public void showStage(Pane root) {
-		StageUtils.showStage(stage, root, "Welcome", 600, 300);
+		StageUtils.showStage(stage, root, "Welcome", 500, 300);
 //		Scene scene = new Scene(root, 500, 300);
 //		stage.setScene(scene);
 //		stage.setResizable(false);

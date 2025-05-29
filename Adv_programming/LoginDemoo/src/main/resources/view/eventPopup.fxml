@@ -39,7 +39,7 @@
       <Spinner fx:id="quantitySpinner" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="5" />
       <Label text="Number:" GridPane.halignment="RIGHT" GridPane.rowIndex="5" />
       <Label fx:id="message" GridPane.columnIndex="1" GridPane.rowIndex="7" />
-      <Button fx:id="addToCartButton" mnemonicParsing="false" style="-fx-background-color: #1E90FF; -fx-text-fill: white;" text="add to cart" GridPane.columnIndex="1" GridPane.rowIndex="9">
+      <Button fx:id="addToCartButton" defaultButton="true" mnemonicParsing="false" text="add to cart" GridPane.columnIndex="1" GridPane.rowIndex="9">
          <GridPane.margin>
             <Insets left="10.0" />
          </GridPane.margin>

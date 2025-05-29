@@ -1,15 +1,14 @@
 package controller;
 
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.Spinner;
-import javafx.scene.control.SpinnerValueFactory;
+import javafx.scene.control.*;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
+import model.CartItems;
 import model.Event;
 import model.Model; // optional if you use shared model for cart
+import model.ShoppingCart;
 import util.StageUtils;
 
 public class EventPopupController {
@@ -58,7 +57,6 @@ public class EventPopupController {
     public void handleAddToCart() {
         int quantity = quantitySpinner.getValue();
         int available = event.getAvailableTickets();
-        System.out.println("quantity: " + quantity);
 
         // check qty exceed available or not
         if (available < quantity) {
@@ -66,14 +64,49 @@ public class EventPopupController {
             message.setTextFill(Color.RED);
             return; // prevent closing popupEvent
          }
-        System.out.println("Added to cart: " + event.getEventName() + " x" + quantity);
 
-        // Optional: Add to shared cart
-//        if (model != null) {
-//            model.getCart().add(event, quantity);
-//        }
-//        stage.close();
+        //Optional: Add to shared cart
+        // ✅ Add or update cart in memory
+        ShoppingCart shoppingCart = model.getShoppingCart(); // model holds the current user's cart
+
+        if(validateAddtoCart(shoppingCart, quantity)) {
+            shoppingCart.addItem(event, quantity);
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+            alert.setTitle("Successfully added to cart.");
+            message.setText("Successfully added to cart.");
+            message.setTextFill(Color.GREEN);
+            //stage.close();
+        }else{
+            message.setText("There are not enough tickets available");
+            message.setTextFill(Color.RED);
+        }
+
+        System.out.println("Current Shopping Cart:");
+        for (CartItems item : shoppingCart.getItems()) {
+            System.out.printf(" - %s x%d\n", item.getEvent().getEventName(), item.getQuantity());
+        }
+
     }
+
+    private boolean validateAddtoCart(ShoppingCart shoppingCart,int quantity) {
+        for (CartItems item : shoppingCart.getItems()) {
+            if (item.getEvent().getId() == event.getId()) {
+                int currentQty = item.getQuantity();
+                int newQty = currentQty + quantity;
+
+                // ✅ Limit check: prevent exceeding available tickets
+                if (newQty > event.getAvailableTickets()) {
+                    System.out.printf("Cannot add %d more. Only %d available.%n",
+                            quantity, event.getAvailableTickets() - currentQty);
+                    return false;
+                }
+                return true;
+            }
+        }
+        // ✅ New item, check limit first
+        return quantity <= event.getAvailableTickets();
+    }
+        //stage.close();
     @FXML
     public void handleCancel() {
         System.out.println("Popup cancelled");

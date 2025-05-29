@@ -75,7 +75,6 @@ public class HomeController {
 						AlertUtils.showInfo("Sold Out", "Sorry, this event is already sold out.", stage);
 						return;
 					}
-
 					// ✅ Otherwise, open the popup
 					openPopupStage(clickedEvent);
 				}
@@ -128,7 +127,11 @@ public class HomeController {
 	}
 
 	public void showStage(Pane root) {
-		StageUtils.showStage(stage, root, "Home", 600, 300);
+		StageUtils.showStage(stage, root, "Home", 600, 450);
+	}
+	private void shoppingCartView() {
+		FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/shoppingCart.fxml"));
+		
 	}
 }
 
