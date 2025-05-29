@@ -10,10 +10,12 @@ public class Model {
 	private UserDao userDao;
 	private User currentUser;
 	private EventDao eventDao;
+	private Cart cart;
 	
 	public Model() {
 		userDao = new UserDaoImpl();
 		eventDao = new EventDao();
+		cart = new Cart();
 	}
 	
 	public void setup() throws SQLException {
@@ -30,5 +32,8 @@ public class Model {
 	
 	public void setCurrentUser(User user) {
 		currentUser = user;
+	}
+	public Cart getCart() {
+		return cart;
 	}
 }

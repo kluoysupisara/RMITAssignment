@@ -12,6 +12,7 @@ import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import model.Model;
 import model.User;
+import util.StageUtils;
 
 public class SignupController {
 	@FXML
@@ -70,10 +71,11 @@ public class SignupController {
 	}
 	
 	public void showStage(Pane root) {
-		Scene scene = new Scene(root, 1000, 500);
-		stage.setScene(scene);
-		stage.setResizable(false);
-		stage.setTitle("Sign up");
-		stage.show();
+		StageUtils.showStage(stage, root, "Sign up", 600, 300);
+//		Scene scene = new Scene(root, 500, 300);
+//		stage.setScene(scene);
+//		stage.setResizable(false);
+//		stage.setTitle("Sign up");
+//		stage.show();
 	}
 }

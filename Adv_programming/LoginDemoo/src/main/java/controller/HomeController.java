@@ -8,12 +8,16 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Cursor;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 import model.Event;
@@ -22,6 +26,8 @@ import model.User;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
+import util.AlertUtils;
+import util.StageUtils;
 
 
 import java.io.IOException;
@@ -55,7 +61,31 @@ public class HomeController {
 		// Access the user through the model
 		User currentUser = model.getCurrentUser();
 		welcomelabel.setText("Welcome! , " + currentUser.getPreferred_name());
+		//set up the table area
+		setupDataRow();
 
+		// click each row
+		eventTable.setRowFactory(tv -> {
+			TableRow<Event> row = new TableRow<>();
+			row.setOnMouseClicked(event -> {
+				if (!row.isEmpty() && event.getClickCount() == 1) {
+					Event clickedEvent = row.getItem();
+					// ✅ Check if tickets are sold out
+					if (clickedEvent.getAvailableTickets() == 0) {
+						AlertUtils.showInfo("Sold Out", "Sorry, this event is already sold out.", stage);
+						return;
+					}
+
+					// ✅ Otherwise, open the popup
+					openPopupStage(clickedEvent);
+				}
+			});
+			return row;
+		});
+
+	}
+	private void setupDataRow() {
+		try {
 			// Set up table column bindings
 			eventName.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getEventName()));
 			venue.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getVenue()));
@@ -69,87 +99,36 @@ public class HomeController {
 			EventDao eventDao = new EventDao();
 			ObservableList<Event> data = FXCollections.observableArrayList(eventDao.getUpComingEvents());
 			eventTable.setItems(data);
-			addButtonToTable();
-
-//			eventTable.setRowFactory(tv -> {
-//				TableRow<Event> row = new TableRow<>();
-//				row.setOnMouseClicked(event -> {
-//					if (!row.isEmpty() && event.getClickCount() == 2) {
-//						Event clickedEvent = row.getItem();
-//						openBookingStage(clickedEvent);
-//					}
-//				});
-//				return row;
-//			});
 
 
+		} catch (SQLException e) {
+			System.out.println("Cannot setup data table:" + e.getMessage());
+		}
 
 	}
-//	private void openBookingStage(Event event) {
-//		try {
-//			FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/BookingView.fxml"));
-//			BookingController controller = new BookingController(event, model);
-//			loader.setController(controller);
-//			VBox root = loader.load();
-//
-//			Stage bookingStage = new Stage();
-//			bookingStage.setTitle("Book Tickets");
-//			bookingStage.setScene(new Scene(root));
-//			bookingStage.show();
-//
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//			Alert alert = new Alert(Alert.AlertType.ERROR);
-//			alert.setContentText("Failed to open booking window.");
-//			alert.showAndWait();
-//		}
-//	}
+	private void openPopupStage(Event event) {
+		try {
+			FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/eventPopup.fxml"));
+			// create new stage to handle stage.close popup
+			Stage popupStage = new Stage();
+			// Set modal behavior and owner to the home stage
+			popupStage.initModality(Modality.WINDOW_MODAL);
+			popupStage.initOwner(stage); // 'stage' is HomeController stage
 
-	private void addButtonToTable() {
-		Callback<TableColumn<Event, Void>, TableCell<Event, Void>> cellFactory = new Callback<>() {
-			@Override
-			public TableCell<Event, Void> call(final TableColumn<Event, Void> param) {
-				return new TableCell<>() {
+			EventPopupController eventPopupController = new EventPopupController(popupStage, event, model);
+			loader.setController(eventPopupController);
+			GridPane root = loader.load();
 
-					private final Button btn = new Button("Book");
+			//show scene of PopupModal
+			eventPopupController.showStage(root);
 
-					{
-						btn.setOnAction((ActionEvent event) -> {
-							Event selectedEvent = getTableView().getItems().get(getIndex());
-							//openBookingStage(selectedEvent);
-						});
-						btn.setStyle("-fx-background-color: #2a9df4; -fx-text-fill: white;");
-					}
-
-			@Override
-			public void updateItem(Void item, boolean empty) {
-				super.updateItem(item, empty);
-				if (empty) {
-					setGraphic(null);
-				} else {
-					HBox box = new HBox(btn);
-					box.setAlignment(Pos.CENTER); // Centers the button
-					//box.setPadding(new Insets(5));
-					setGraphic(box);
-				}
-					}
-
-				};
-			}
-		};
-
-		actionColumn.setCellFactory(cellFactory);
+		} catch (IOException e) {
+			System.out.println("Failed to open booking window: " + e.getMessage());
+		}
 	}
-
-
-
-
 
 	public void showStage(Pane root) {
-		Scene scene = new Scene(root, 1000, 500);
-		stage.setScene(scene);
-		stage.setResizable(false);
-		stage.setTitle("Home");
-		stage.show();
+		StageUtils.showStage(stage, root, "Home", 600, 300);
 	}
 }
+
