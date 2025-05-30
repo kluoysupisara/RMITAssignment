@@ -10,17 +10,16 @@
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.RowConstraints?>
 
-
 <BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1">
    <center>
-      <TableView prefHeight="246.0" prefWidth="500.0" BorderPane.alignment="CENTER">
+      <TableView fx:id="cartTable" prefHeight="246.0" prefWidth="500.0" BorderPane.alignment="CENTER">
         <columns>
-            <TableColumn prefWidth="70.0" text="EVENT" />
-          <TableColumn prefWidth="70.0" text="VENUE" />
-            <TableColumn prefWidth="70.0" text="DATE" />
-            <TableColumn maxWidth="113.0" prefWidth="120.0" text="PRICE PER SEAT" />
-            <TableColumn prefWidth="76.0" text="QUANTITY" />
-            <TableColumn prefWidth="100.0" text="REMOVE" />
+            <TableColumn fx:id="eventColumn" prefWidth="70.0" text="EVENT" />
+          <TableColumn fx:id="venueColumn" prefWidth="70.0" text="VENUE" />
+            <TableColumn fx:id="dateColumn" prefWidth="70.0" text="DATE" />
+            <TableColumn fx:id="priceColumn" maxWidth="113.0" prefWidth="120.0" text="PRICE PER SEAT" />
+            <TableColumn fx:id="quantityColumn" prefWidth="76.0" text="QUANTITY" />
+            <TableColumn fx:id="removeColumn" prefWidth="100.0" text="REMOVE" />
         </columns>
          <BorderPane.margin>
             <Insets bottom="10.0" left="50.0" right="50.0" top="20.0" />
@@ -37,12 +36,12 @@
           <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
         </rowConstraints>
          <children>
-            <Button mnemonicParsing="false" text="Back">
+            <Button mnemonicParsing="false" onAction="#handleBack" text="Back">
                <GridPane.margin>
                   <Insets left="10.0" />
                </GridPane.margin>
             </Button>
-            <Label prefHeight="17.0" prefWidth="89.0" text="Shpping cart" GridPane.columnIndex="1" />
+            <Label prefHeight="17.0" prefWidth="89.0" text="Shopping cart" GridPane.columnIndex="1" />
          </children>
          <padding>
             <Insets top="10.0" />
@@ -62,12 +61,12 @@
             <RowConstraints maxHeight="37.0" minHeight="10.0" prefHeight="37.0" vgrow="SOMETIMES" />
         </rowConstraints>
          <children>
-            <Button defaultButton="true" mnemonicParsing="false" text="Check out" GridPane.columnIndex="1" GridPane.halignment="LEFT" GridPane.rowIndex="2">
+            <Button defaultButton="true" mnemonicParsing="false" onAction="#handleCheckout" text="Check out" GridPane.columnIndex="1" GridPane.halignment="LEFT" GridPane.rowIndex="2">
                <GridPane.margin>
                   <Insets />
                </GridPane.margin>
             </Button>
-            <Label GridPane.columnIndex="1" GridPane.halignment="LEFT" />
+            <Label fx:id="totalLabel" GridPane.columnIndex="1" GridPane.halignment="LEFT" />
             <Label text="Total Price:" GridPane.halignment="RIGHT">
                <padding>
                   <Insets right="20.0" />

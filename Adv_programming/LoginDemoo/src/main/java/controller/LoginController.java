@@ -2,6 +2,7 @@ package controller;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.List;
 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -16,7 +17,9 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.util.Callback;
+import model.CartItems;
 import model.Model;
+import model.ShoppingCart;
 import model.User;
 import util.StageUtils;
 
@@ -53,6 +56,7 @@ public class LoginController {
 				user = model.getUserDao().getUser(name.getText(), password.getText());
 				if (user != null) {
 					model.setCurrentUser(user);
+					System.out.println("Login successful");
 					loadHomeViewStage();
 				} else {
 					message.setText("Wrong username or password");
@@ -74,7 +78,6 @@ public class LoginController {
 		try {
 			FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/SignupView.fxml"));
 
-			// Customize controller instance
 			SignupController signupController =  new SignupController(stage, model);
 
 			loader.setController(signupController);
@@ -109,11 +112,6 @@ public class LoginController {
 
 	public void showStage(Pane root) {
 		StageUtils.showStage(stage, root, "Welcome", 500, 300);
-//		Scene scene = new Scene(root, 500, 300);
-//		stage.setScene(scene);
-//		stage.setResizable(false);
-//		stage.setTitle("Welcome");
-//		stage.show();
 	}
 }
 

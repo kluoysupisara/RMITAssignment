@@ -1,6 +1,7 @@
 package controller;
 
 import dao.EventDao;
+import dao.ShoppingCartDao;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -63,7 +64,6 @@ public class HomeController {
 		welcomelabel.setText("Welcome! , " + currentUser.getPreferred_name());
 		//set up the table area
 		setupDataRow();
-
 		// click each row
 		eventTable.setRowFactory(tv -> {
 			TableRow<Event> row = new TableRow<>();
@@ -81,9 +81,8 @@ public class HomeController {
 			});
 			return row;
 		});
-
 	}
-	private void setupDataRow() {
+	public void setupDataRow() {
 		try {
 			// Set up table column bindings
 			eventName.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getEventName()));
@@ -95,8 +94,9 @@ public class HomeController {
 			availableTickets.setCellValueFactory(cellData -> new SimpleIntegerProperty(cellData.getValue().getAvailableTickets()));
 
 			// Set data into table
-			EventDao eventDao = new EventDao();
-			ObservableList<Event> data = FXCollections.observableArrayList(eventDao.getUpComingEvents());
+			ObservableList<Event> data = FXCollections.observableArrayList(
+					model.getEventDao().getUpComingEvents()
+			);
 			eventTable.setItems(data);
 
 
@@ -128,10 +128,37 @@ public class HomeController {
 
 	public void showStage(Pane root) {
 		StageUtils.showStage(stage, root, "Home", 600, 450);
+		setupDataRow(); // refresh data when shoeing again
 	}
-	private void shoppingCartView() {
-		FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/shoppingCart.fxml"));
-		
+
+	@FXML
+	private void shoppingCartView() throws IOException {
+		if (model.getShoppingCart() == null || model.getShoppingCart().getItems().isEmpty()) {
+			AlertUtils.showInfo("Shopping Cart", "Your shopping cart is empty.", stage);
+			return;
+		}
+		FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/ShoppingCart.fxml"));
+		ShoppingCartController controller = new ShoppingCartController(stage, model);
+
+		loader.setController(controller);
+		Pane root = loader.load();
+		controller.showStage(root);
+		stage.close();
+
+	}
+
+	@FXML
+	private void handleLogout() throws IOException {
+		boolean confirm = AlertUtils.showConfirmation("Logout Confirmation",
+				"Are you sure you want to logout?",
+				stage);
+
+		if (confirm) {
+			model.logout(); // clear username amd shoppingCart memory
+			parentStage.show(); // comeback to loginView
+			stage.close();
+		}
+
 	}
 }
 

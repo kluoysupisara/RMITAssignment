@@ -7,8 +7,8 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CartDao {
-    private final String TABLE_NAME = "cartItems";
+public class ShoppingCartDao {
+    private final String TABLE_NAME = "shopping_cart";
 
     public void createTable() {
         try (Connection con = Database.getConnection();
@@ -18,34 +18,32 @@ public class CartDao {
                     + "user_name  TEXT NOT NULL,"
                     + "event_id INTEGER NOT NULL,"
                     + "quantity INTEGER NOT NULL,"
-                    + "FOREIGN KEY (user_id) REFERENCES users(id),"
+                    + "FOREIGN KEY (user_name) REFERENCES users(id),"
                     + "FOREIGN KEY (event_id) REFERENCES events(id),"
-                    + "UNIQUE(user_name, event_id)))");
+                    + "UNIQUE(user_name, event_id))");
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
     }
     public List<CartItems> loadCartItems(String userName) {
+        System.out.println("Loading shopping cart items for user: " + userName);
         List<CartItems> cartItems = new ArrayList<>();
-        String sql = """
-                    SELECT c.quantity, e.*
-                    FROM  ?
-                    JOIN users u ON c.user_name = u.user_name
-                    JOIN events e ON c.event_id = e.id
-                    WHERE u.username = ?
-                """;
+        String sql = "SELECT c.quantity, e.* FROM " + TABLE_NAME + " c " +
+                "JOIN users u ON c.user_name = u.userName " +
+                "JOIN events e ON c.event_id = e.id " +
+                "WHERE u.userName = ?";
+
         try (Connection con = Database.getConnection();
              PreparedStatement stmt = con.prepareStatement(sql)) {
-            stmt.setString(1, TABLE_NAME);
-            stmt.setString(2, userName);
-
-            //execute Query to get data from database
+            stmt.setString(1, userName);
             ResultSet rs = stmt.executeQuery();
+
             while (rs.next()) {
                 int total = rs.getInt("total");
                 int sold = rs.getInt("sold");
                 int available = total - sold;
                 String day = rs.getString("day");
+
                 Event event = new Event(
                         rs.getInt("id"),
                         rs.getString("eventName"),
@@ -60,18 +58,16 @@ public class CartDao {
                 int quantity = rs.getInt("quantity");
                 cartItems.add(new CartItems(event, quantity));
             }
-            return cartItems;
         } catch (SQLException e) {
             System.out.println(e.getMessage());
-        };
+        }
         return cartItems;
     }
+
     public void saveOrUpdateItem(String username, int eventId, int quantity) {
-        String sql = """
-            INSERT INTO cart (user_id, event_id, quantity)
-            VALUES ((SELECT id FROM users WHERE username = ?), ?, ?)
-            ON CONFLICT(user_id, event_id) DO UPDATE SET quantity = excluded.quantity
-        """;
+        String sql = "INSERT INTO " + TABLE_NAME +
+                " (user_name, event_id, quantity) VALUES (?, ?, ?) " +
+                "ON CONFLICT(user_name, event_id) DO UPDATE SET quantity = excluded.quantity";
 
         try (Connection con = Database.getConnection();
              PreparedStatement stmt = con.prepareStatement(sql)) {
@@ -80,18 +76,14 @@ public class CartDao {
             stmt.setInt(2, eventId);
             stmt.setInt(3, quantity);
             stmt.executeUpdate();
-
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
     public void removeItem(String username, int eventId) {
-        String sql = """
-            DELETE FROM cart
-            WHERE user_id = (SELECT id FROM users WHERE username = ?)
-              AND event_id = ?
-        """;
+        String sql = "DELETE FROM " + TABLE_NAME +
+                " WHERE user_name = ? AND event_id = ?";
 
         try (Connection con = Database.getConnection();
              PreparedStatement stmt = con.prepareStatement(sql)) {
@@ -101,15 +93,13 @@ public class CartDao {
             stmt.executeUpdate();
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.out.println("Remove item failed: " + e.getMessage());
         }
     }
 
     public void clearCart(String username) {
-        String sql = """
-            DELETE FROM cart
-            WHERE user_id = (SELECT id FROM users WHERE username = ?)
-        """;
+        String sql = "DELETE FROM " + TABLE_NAME +
+                " WHERE user_name = ?";
 
         try (Connection con = Database.getConnection();
              PreparedStatement stmt = con.prepareStatement(sql)) {
@@ -118,7 +108,7 @@ public class CartDao {
             stmt.executeUpdate();
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.out.println("Clear cart failed: " + e.getMessage());
         }
     }
 }

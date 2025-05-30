@@ -35,7 +35,6 @@ public class EventPopupController {
 
     @FXML
     private void initialize() {
-        System.out.println("EventPopupController initialized");
         setEvent(event);
         addToCartButton.setOnAction(e -> handleAddToCart());
         cancelButton.setOnAction(e -> {handleCancel();});
@@ -48,7 +47,6 @@ public class EventPopupController {
         priceLabel.setText(String.format("$%.2f", event.getPrice()));
         //availableTicketsLabel.setText(String.valueOf(event.getAvailableTickets()));
         int max = event.getAvailableTickets();
-        System.out.println("max: " + max);
         SpinnerValueFactory<Integer> valueFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(1, Integer.MAX_VALUE, 1);
         quantitySpinner.setValueFactory(valueFactory);
     }
@@ -72,10 +70,10 @@ public class EventPopupController {
         if(validateAddtoCart(shoppingCart, quantity)) {
             shoppingCart.addItem(event, quantity);
             Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-            alert.setTitle("Successfully added to cart.");
             message.setText("Successfully added to cart.");
             message.setTextFill(Color.GREEN);
-            //stage.close();
+            // Disable the button to prevent double adding
+            addToCartButton.setDisable(true);
         }else{
             message.setText("There are not enough tickets available");
             message.setTextFill(Color.RED);

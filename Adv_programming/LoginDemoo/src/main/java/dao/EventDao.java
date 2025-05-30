@@ -33,15 +33,26 @@ public class EventDao {
 
             stmt.executeUpdate(sql);
             System.out.println("Table '" + TABLE_NAME + "' checked/created successfully.");
-            insertEventFromFile();
+            // ✅ Only insert data if table is empty
+            if (isTableEmpty(conn)) {
+                insertEventFromFile(conn);
+            } else {
+                System.out.println("Table is not empty. Skipping file import.");
+            }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
-    public void insertEventFromFile() throws SQLException, IOException {
+    private boolean isTableEmpty(Connection conn) throws SQLException {
+        String checkSql = "SELECT COUNT(*) FROM " + TABLE_NAME;
+        try (Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(checkSql)) {
+            return rs.next() && rs.getInt(1) == 0;
+        }
+    }
+    public void insertEventFromFile(Connection conn) throws SQLException, IOException {
         String filePath = "src/events.dat";
-        try (Connection conn = Database.getConnection()) {
-            System.out.println("access read from file");
+        try {
             //Read file event.dat to insert into table
             BufferedReader br = new BufferedReader(new FileReader(filePath));
             String line;
@@ -62,6 +73,8 @@ public class EventDao {
                 System.out.println(pstmt.toString());
             }
             System.out.println("Setup Data imported successfully");
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
     }
     public static List<String> getValidDays(){
@@ -114,6 +127,20 @@ public class EventDao {
         }
 
         return events;
+    }
+    public void updateSoldTickets(int eventId, int newSoldCount) {
+        String sql = "UPDATE " + TABLE_NAME + " SET sold = ? WHERE id = ?";
+
+        try (Connection con = Database.getConnection();
+             PreparedStatement stmt = con.prepareStatement(sql)) {
+
+            stmt.setInt(1, newSoldCount);
+            stmt.setInt(2, eventId);
+            stmt.executeUpdate();
+
+        } catch (SQLException e) {
+            System.out.println("Error updating sold tickets: " + e.getMessage());
+        }
     }
 
 }

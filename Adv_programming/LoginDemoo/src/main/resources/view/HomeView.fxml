@@ -19,7 +19,8 @@
       <menus>
             <Menu fx:id="profile" mnemonicParsing="false" text="Profile">
               <items>
-                  <MenuItem fx:id="updateProfile1" mnemonicParsing="false" text="logout" />
+                  <MenuItem fx:id="historyMenu" mnemonicParsing="false" text="History" />
+                  <MenuItem fx:id="logoutMenu" mnemonicParsing="false" onAction="#handleLogout" text="Logout" />
               </items>
             </Menu>
       </menus>
@@ -33,7 +34,10 @@
           <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
         </rowConstraints>
          <children>
-            <Label fx:id="welcomelabel" prefHeight="30.0" prefWidth="76.0" />
+            <Label fx:id="welcomelabel" prefHeight="30.0" prefWidth="324.0">
+               <GridPane.margin>
+                  <Insets left="5.0" />
+               </GridPane.margin></Label>
             <Button defaultButton="true" mnemonicParsing="false" onAction="#shoppingCartView" text="ShoppingCart" GridPane.columnIndex="1" GridPane.halignment="RIGHT" />
          </children>
       </GridPane>
