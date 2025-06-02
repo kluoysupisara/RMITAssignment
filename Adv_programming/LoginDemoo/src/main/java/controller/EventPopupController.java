@@ -9,6 +9,7 @@ import model.CartItems;
 import model.Event;
 import model.Model; // optional if you use shared model for cart
 import model.ShoppingCart;
+import util.AlertUtils;
 import util.StageUtils;
 
 public class EventPopupController {
@@ -94,8 +95,10 @@ public class EventPopupController {
 
                 // ✅ Limit check: prevent exceeding available tickets
                 if (newQty > event.getAvailableTickets()) {
-                    System.out.printf("Cannot add %d more. Only %d available.%n",
-                            quantity, event.getAvailableTickets() - currentQty);
+//                    System.out.printf("Cannot add %d more. Only %d available.%n",
+//                            quantity, event.getAvailableTickets() - currentQty);
+                    String message = String.format("Cannot add %d more. Only %d available.%n", quantity, event.getAvailableTickets() - currentQty);
+                    AlertUtils.showWarning("Ticket Exceed Warning", message, stage);
                     return false;
                 }
                 return true;

@@ -1,13 +1,13 @@
 package model;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 
 import dao.ShoppingCartDao;
 import dao.EventDao;
 import dao.UserDao;
 import dao.UserDaoImpl;
+import dao.OrderDao;
 
 public class Model {
 	private UserDao userDao;
@@ -15,17 +15,20 @@ public class Model {
 	private EventDao eventDao;
 	private ShoppingCartDao shoppingCartDao;
 	private ShoppingCart shoppingCart;
+	private OrderDao orderDao;
 	
 	public Model() {
 		userDao = new UserDaoImpl();
 		eventDao = new EventDao();
 		shoppingCartDao = new ShoppingCartDao();
+		orderDao = new OrderDao();
 	}
 	
 	public void setup() throws SQLException {
 		userDao.setup();
 		eventDao.setup();
 		shoppingCartDao.createTable();
+		orderDao.createTables();
 	}
 	public UserDao getUserDao() {
 		return userDao;
@@ -70,5 +73,8 @@ public class Model {
 	}
 	public EventDao getEventDao() {
 		return eventDao;
+	}
+	public OrderDao getOrderDao() {
+		return orderDao;
 	}
 }

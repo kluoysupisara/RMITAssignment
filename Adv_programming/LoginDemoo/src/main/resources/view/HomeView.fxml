@@ -19,7 +19,7 @@
       <menus>
             <Menu fx:id="profile" mnemonicParsing="false" text="Profile">
               <items>
-                  <MenuItem fx:id="historyMenu" mnemonicParsing="false" text="History" />
+                  <MenuItem fx:id="historyMenu" mnemonicParsing="false" onAction="#openHistoryView" text="History" />
                   <MenuItem fx:id="logoutMenu" mnemonicParsing="false" onAction="#handleLogout" text="Logout" />
               </items>
             </Menu>

@@ -133,13 +133,23 @@ public class HomeController {
 
 	@FXML
 	private void shoppingCartView() throws IOException {
-		if (model.getShoppingCart() == null || model.getShoppingCart().getItems().isEmpty()) {
-			AlertUtils.showInfo("Shopping Cart", "Your shopping cart is empty.", stage);
-			return;
-		}
+//		if (model.getShoppingCart() == null || model.getShoppingCart().getItems().isEmpty()) {
+//			AlertUtils.showInfo("Shopping Cart", "Your shopping cart is empty.", stage);
+//			return;
+//		}
 		FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/ShoppingCart.fxml"));
-		ShoppingCartController controller = new ShoppingCartController(stage, model);
+		ShoppingCartController controller = new ShoppingCartController(stage, model, this); // pass homeController to update data
 
+		loader.setController(controller);
+		Pane root = loader.load();
+		controller.showStage(root);
+		stage.close();
+
+	}
+	@FXML
+	private void openHistoryView() throws IOException {
+		FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/HistoryView.fxml"));
+		OrderHistoryController controller = new OrderHistoryController(stage, model);
 		loader.setController(controller);
 		Pane root = loader.load();
 		controller.showStage(root);

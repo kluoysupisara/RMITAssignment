@@ -61,7 +61,7 @@
             <RowConstraints maxHeight="37.0" minHeight="10.0" prefHeight="37.0" vgrow="SOMETIMES" />
         </rowConstraints>
          <children>
-            <Button defaultButton="true" mnemonicParsing="false" onAction="#handleCheckout" text="Check out" GridPane.columnIndex="1" GridPane.halignment="LEFT" GridPane.rowIndex="2">
+            <Button fx:id="checkoutButton" defaultButton="true" mnemonicParsing="false" onAction="#handleCheckout" text="Check out" GridPane.columnIndex="1" GridPane.halignment="LEFT" GridPane.rowIndex="2">
                <GridPane.margin>
                   <Insets />
                </GridPane.margin>

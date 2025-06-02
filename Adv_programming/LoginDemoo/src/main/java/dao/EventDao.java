@@ -142,6 +142,30 @@ public class EventDao {
             System.out.println("Error updating sold tickets: " + e.getMessage());
         }
     }
+    public Event getEventById(int eventId) {
+        String sql = "SELECT * FROM " + TABLE_NAME + " WHERE id = ?";
+        try (Connection con = Database.getConnection();
+             PreparedStatement stmt = con.prepareStatement(sql)) {
+            stmt.setInt(1, eventId);
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                int id = rs.getInt("id");
+                String eventName = rs.getString("eventName");
+                String venue = rs.getString("venue");
+                String day = rs.getString("day");
+                double price = rs.getDouble("price");
+                int sold = rs.getInt("sold");
+                int total = rs.getInt("total");
+                int available = total - sold;
+
+                return new Event(id, eventName, venue, day, price, sold, total, available);
+            }
+        } catch (SQLException e) {
+            System.out.println("Error getting event by ID: " + e.getMessage());
+        }
+        return null;
+    }
 
 }
 

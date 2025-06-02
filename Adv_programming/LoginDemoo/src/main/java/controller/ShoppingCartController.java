@@ -11,6 +11,7 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import model.CartItems;
 import model.Event;
@@ -50,11 +51,13 @@ public class ShoppingCartController {
     private Label totalLabel;
     private Stage parentStage;
     private HomeController homeController;  // direct reference
+    private Double totalPrice;
 
-    public ShoppingCartController(Stage parentstage, Model model) {
+    public ShoppingCartController(Stage parentstage, Model model, HomeController homeController) {
         this.stage = new Stage();
         this.model = model;
         this.parentStage = parentstage;
+        this.homeController = homeController;
     }
 
     @FXML
@@ -67,7 +70,16 @@ public class ShoppingCartController {
         // Set table data
         cartTable.setItems(model.getShoppingCart().getItems());
         updateTotal();
+        if(model.getShoppingCart() == null || model.getShoppingCart().getItems().isEmpty()) {
+            checkoutButton.setDisable(true);
+        }
     }
+    public void refreshCart() {
+        System.out.println("Refreshing ShoppingCartController");
+        cartTable.setItems(model.getShoppingCart().getItems()); // Rebind just in case
+        updateTotal(); // Recalculate total
+    }
+
 
     private void setupColumns() {
         eventColumn.setCellValueFactory(cellData ->
@@ -141,22 +153,31 @@ public class ShoppingCartController {
     }
 
 
-    private void updateTotal() {
-        double total = model.getShoppingCart().getItems().stream()
+    private double updateTotal() {
+        double totalPrice = model.getShoppingCart().getItems().stream()
                 .mapToDouble(item -> item.getEvent().getPrice() * item.getQuantity())
                 .sum();
-        totalLabel.setText("$" + String.format("%.2f", total));
+        totalLabel.setText("$" + String.format("%.2f",totalPrice));
+        return totalPrice;
     }
 
-    @FXML
-    private void handleBack() {
-        System.out.println("Back ShoppingCartController");
-        if (stage != null) {
-            stage.close();// Close the cart stage only
-            homeController.setupDataRow();
-            parentStage.show();
-        }
-    }
+//
+//    @FXML
+//    private void handleBack() {
+//        System.out.println("Back ShoppingCartController");
+//
+//        try {
+//            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/HomeView.fxml"));
+//            HomeController homeController = new HomeController(, model);
+//            loader.setController(homeController);
+//
+//            Pane root = loader.load();
+//            homeController.showStage(root);
+//            stage.close();
+//        } catch (IOException e) {
+//            System.out.println("Failed to reload HomeView: " + e.getMessage());
+//        }
+//    }
 
     public void showStage(Pane root) {
         StageUtils.showStage(stage, root, "Shopping Cart", 600, 400);
@@ -164,13 +185,13 @@ public class ShoppingCartController {
 
     @FXML
     private void handleCheckout() {
-        double total = model.getShoppingCart().getItems().stream()
-                .mapToDouble(item -> item.getEvent().getPrice() * item.getQuantity())
-                .sum();
+//        double total = model.getShoppingCart().getItems().stream()
+//                .mapToDouble(item -> item.getEvent().getPrice() * item.getQuantity())
+//                .sum();
 
         Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
         confirmAlert.setTitle("Confirm Checkout");
-        confirmAlert.setHeaderText("Total Price: $" + String.format("%.2f", total));
+        confirmAlert.setHeaderText("Total Price: $" + String.format("%.2f", updateTotal()));
         confirmAlert.setContentText("Do you want to proceed to payment?");
 
         // Proceed if user clicks OK
@@ -187,7 +208,12 @@ public class ShoppingCartController {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/Payment.fxml"));
 
-            PaymentController controller = new PaymentController(stage, model, this::processPayment);
+            Stage paymentStage = new Stage();
+            // Set modal behavior and owner to the home stage
+            paymentStage.initModality(Modality.WINDOW_MODAL);
+            paymentStage.initOwner(stage); // 'stage' is HomeController stage
+
+            PaymentController controller = new PaymentController(paymentStage, model, updateTotal(), this);
             loader.setController(controller);
 
             AnchorPane root = loader.load();
@@ -197,21 +223,30 @@ public class ShoppingCartController {
             System.out.println("Failed to open payment window: " + e.getMessage());
         }
     }
-    private void processPayment() {
-        // Update sold tickets in DB
-        for (CartItems item : model.getShoppingCart().getItems()) {
-            Event event = item.getEvent();
-            int newSold = event.getSoldTickets() + item.getQuantity();
-            event.setSoldTickets(newSold);
-
-            model.getEventDao().updateSoldTickets(event.getId(), newSold);
+//    private void processPayment() {
+//        // Update sold tickets in DB
+//        for (CartItems item : model.getShoppingCart().getItems()) {
+//            Event event = item.getEvent();
+//            int newSold = event.getSoldTickets() + item.getQuantity();
+//            event.setSoldTickets(newSold);
+//
+//            model.getEventDao().updateSoldTickets(event.getId(), newSold);
+//        }
+//
+//        // Clear cart from DB and memory
+//        model.getShoppingCart().clear();
+//        model.getshoppingCartDao().clearCart(model.getCurrentUser().getUsername());
+//
+//        AlertUtils.showInfo("Payment Successful", "Your order has been confirmed.", stage);
+//    }
+    @FXML
+    private void handleBack() {
+        System.out.println("Back ShoppingCartController");
+        if (stage != null) {
+            stage.close();// Close the cart stage only
+            homeController.setupDataRow();
+            parentStage.show();
         }
-
-        // Clear cart from DB and memory
-        model.getShoppingCart().clear();
-        model.getshoppingCartDao().clearCart(model.getCurrentUser().getUsername());
-
-        AlertUtils.showInfo("Payment Successful", "Your order has been confirmed.", stage);
     }
 }
 

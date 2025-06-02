@@ -107,6 +107,7 @@ public class LoginController {
 			stage.close();
 		} catch (IOException e) {
 			message.setText(e.getMessage());
+			System.out.println(e.getMessage());
 		}
 	}
 

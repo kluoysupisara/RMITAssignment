@@ -26,6 +26,7 @@ public class Main extends Application {
 	public void start(Stage primaryStage) {
 		try {
 			model.setup();
+
 			FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/LoginView.fxml"));
 			
 			// Customize controller instance
