@@ -16,6 +16,7 @@ public class Model {
 	private ShoppingCartDao shoppingCartDao;
 	private ShoppingCart shoppingCart;
 	private OrderDao orderDao;
+	private boolean isAdmin = false;
 	
 	public Model() {
 		userDao = new UserDaoImpl();
@@ -33,6 +34,13 @@ public class Model {
 	public UserDao getUserDao() {
 		return userDao;
 	}
+
+	public boolean isAdmin() {
+		return isAdmin;
+	}
+	public void setAdmin(boolean admin) {
+		isAdmin = admin;
+	}
 	
 	public User getCurrentUser() {
 		return this.currentUser;
@@ -40,25 +48,38 @@ public class Model {
 	
 	public void setCurrentUser(User user) {
 		currentUser = user;
-		shoppingCartDao = new ShoppingCartDao();
-
-		// Create new cart instance for the user
-		this.shoppingCart = new ShoppingCart(user.getUsername(), shoppingCartDao);
-
-		//load shopping_cart from database
-		List<CartItems> items = shoppingCartDao.loadCartItems(user.getUsername());
-		//add all loaded items to shopping Cart's ObservableList
-		shoppingCart.getItems().addAll(items);
-
-		// ✅ Optional: print loaded cart items
-		// Print loaded items (or say it's empty)
-		System.out.println("Loaded cart items for user: " + user.getUsername());
-		if (items.isEmpty()) {
-			System.out.println("- Cart is currently empty.");
+		// ------------------ [backup]-----------------------
+//		shoppingCartDao = new ShoppingCartDao();
+//
+//		// Create new cart instance for the user
+//		this.shoppingCart = new ShoppingCart(user.getUsername(), shoppingCartDao);
+//
+//		//load shopping_cart from database
+//		List<CartItems> items = shoppingCartDao.loadCartItems(user.getUsername());
+//		//add all loaded items to shopping Cart's ObservableList
+//		shoppingCart.getItems().addAll(items);
+//
+//		// ✅ Optional: print loaded cart items
+//		// Print loaded items (or say it's empty)
+//		System.out.println("Loaded cart items for user: " + user.getUsername());
+//		if (items.isEmpty()) {
+//			System.out.println("- Cart is currently empty.");
+//		} else {
+//			for (CartItems item : items) {
+//				System.out.printf("- %s x%d%n", item.getEvent().getEventName(), item.getQuantity());
+//			}
+//		}
+		if (!isAdmin) {
+			shoppingCartDao = new ShoppingCartDao();
+			this.shoppingCart = new ShoppingCart(user.getUsername(), shoppingCartDao);
+			List<CartItems> items = shoppingCartDao.loadCartItems(user.getUsername());
+			shoppingCart.getItems().addAll(items);
+			// Log
+			System.out.println("Loaded cart items for user: " + user.getUsername());
+			items.forEach(item -> System.out.printf("- %s x%d%n", item.getEvent().getEventName(), item.getQuantity()));
 		} else {
-			for (CartItems item : items) {
-				System.out.printf("- %s x%d%n", item.getEvent().getEventName(), item.getQuantity());
-			}
+			this.shoppingCart = null;
+			System.out.println("Admin mode enabled.");
 		}
 	}
 	public ShoppingCartDao getshoppingCartDao() {

@@ -44,37 +44,71 @@ public class LoginController {
 	}
 	
 	@FXML
-	public void initialize() {		
+	public void initialize() {
 //		login.setOnAction(event -> handleLogin());
-//
 //		signup.setOnAction(event -> handleSignup());
+
 	}
+	//------------------ [Backup login]----------------------
+//	@FXML
+//	private void handleLogin() {
+//		if (!name.getText().isEmpty() && !password.getText().isEmpty()) {
+//			User user;
+//			try {
+//				user = model.getUserDao().getUser(name.getText(), password.getText());
+//				if (user != null) {
+//					model.setCurrentUser(user);
+//					System.out.println("Login successful");
+//					// separate Admin and User path
+//					if (user.getUsername().equals("admin") && user.getPassword().equals("Admin321")) {
+//						loadAdminDashboardStage();
+//					} else {
+//						loadHomeViewStage();
+//					}
+//				} else {
+//					message.setText("Wrong username or password");
+//					message.setTextFill(Color.RED);
+//				}
+//			} catch (SQLException e) {
+//				message.setText(e.getMessage());
+//				message.setTextFill(Color.RED);
+//			}
+//
+//		} else {
+//			message.setText("Empty username or password");
+//			message.setTextFill(Color.RED);
+//		}
+//		name.clear();
+//		password.clear();
+//	}
+	//------------------ [Backup login]----------------------
 	@FXML
 	private void handleLogin() {
-		if (!name.getText().isEmpty() && !password.getText().isEmpty()) {
-			User user;
+		if (isInputValid()) {
 			try {
-				user = model.getUserDao().getUser(name.getText(), password.getText());
+				User user = model.getUserDao().getUser(name.getText(), password.getText());
 				if (user != null) {
+					// ✅ Set admin flag BEFORE setting current user
+					model.setAdmin(isAdmin(user));
 					model.setCurrentUser(user);
-					System.out.println("Login successful");
-					loadHomeViewStage();
+					if (model.isAdmin()) {
+						loadAdminDashboardStage();
+					} else {
+						loadHomeViewStage();
+					}
+
 				} else {
-					message.setText("Wrong username or password");
-					message.setTextFill(Color.RED);
+					showErrorMessage("Wrong username or password");
 				}
 			} catch (SQLException e) {
-				message.setText(e.getMessage());
-				message.setTextFill(Color.RED);
+				showErrorMessage("Database error: " + e.getMessage());
 			}
-
 		} else {
-			message.setText("Empty username or password");
-			message.setTextFill(Color.RED);
+			showErrorMessage("Empty username or password");
 		}
-		name.clear();
-		password.clear();
+		clearInput();
 	}
+
 	@FXML
 	private void handleSignup() {
 		try {
@@ -115,11 +149,11 @@ public class LoginController {
 
 	private  void loadAdminDashboardStage() {
 		try {
-			FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/AdminDashBoard.fxml"));
-			HomeController controller = new HomeController(stage, model);
+			FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/AdminDashboard.fxml"));
+			AdminDashboardController controller = new AdminDashboardController(stage, model);
 
 			loader.setController(controller);
-			VBox root = loader.load();
+			Pane root = loader.load();
 
 			controller.showStage(root);
 			stage.close();
@@ -131,6 +165,21 @@ public class LoginController {
 
 	public void showStage(Pane root) {
 		StageUtils.showStage(stage, root, "Welcome", 500, 300);
+	}
+	private boolean isInputValid() {
+		return !name.getText().isEmpty() && !password.getText().isEmpty();
+	}
+	private boolean isAdmin(User user) {
+		return user.getUsername().equals("admin") && user.getPassword().equals("Admin321");
+	}
+	private void showErrorMessage(String msg) {
+		message.setText(msg);
+		message.setTextFill(Color.RED);
+	}
+	private void clearInput() {
+		name.clear();
+		password.clear();
+		//message.setText("");
 	}
 }
 

@@ -9,10 +9,10 @@ public class Event {
     private int soldTickets;
     private int totalTickets;
     private int availableTickets;
-    private int enabled;
+    private boolean enabled;
 
 
-    public Event(int id, String eventName, String venue, String day, double price, int soldTickets, int totalTickets, int availableTickets, int enabled) {
+    public Event(int id, String eventName, String venue, String day, double price, int soldTickets, int totalTickets, int availableTickets, boolean enabled) {
         this.id = id;
         this.eventName = eventName;
         this.venue = venue;
@@ -55,10 +55,26 @@ public class Event {
     public void setTotalTickets(int totalTickets) {
         this.totalTickets = totalTickets;
     }
-    public int getEnabled() {
+    public boolean getEnabled() {
         return enabled;
     }
-    public void setEnabled(int enabled) {
+    public void setEnabled(boolean enabled) {
         this.enabled = enabled;
+    }
+
+    public void setEventName(String text) {
+        this.eventName = text;
+    }
+
+    public void setVenue(String text) {
+        this.venue = text;
+    }
+
+    public void setDay(String value) {
+        this.day = value;
+    }
+
+    public void setPrice(double v) {
+        this.price = v;
     }
 }

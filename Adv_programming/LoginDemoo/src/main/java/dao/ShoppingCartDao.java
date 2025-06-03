@@ -27,6 +27,7 @@ public class ShoppingCartDao {
     }
     public List<CartItems> loadCartItems(String userName) {
         System.out.println("Loading shopping cart items for user: " + userName);
+        EventDao eventDao = new EventDao();
         List<CartItems> cartItems = new ArrayList<>();
         String sql = "SELECT c.quantity, e.* FROM " + TABLE_NAME + " c " +
                 "JOIN users u ON c.user_name = u.userName " +
@@ -39,21 +40,18 @@ public class ShoppingCartDao {
             ResultSet rs = stmt.executeQuery();
 
             while (rs.next()) {
-                int total = rs.getInt("total");
-                int sold = rs.getInt("sold");
-                int available = total - sold;
-                String day = rs.getString("day");
-
-                Event event = new Event(
-                        rs.getInt("id"),
-                        rs.getString("eventName"),
-                        rs.getString("venue"),
-                        day,
-                        rs.getDouble("price"),
-                        sold,
-                        total,
-                        available
-                );
+                Event event = eventDao.buildEventFromResultSet(rs);
+//                int id = rs.getInt("id");
+//                String name = rs.getString("event_name");
+//                String venue = rs.getString("venue");
+//                String day = rs.getString("day");
+//                double price = rs.getDouble("price");
+//                int soldTickets = rs.getInt("sold_tickets");
+//                int totalTickets = rs.getInt("total_tickets");
+//                int availableTickets = totalTickets - soldTickets;
+//                int enabled = rs.getInt("enabled");
+//
+//                Event event =  new Event(id, name, venue, day, price, soldTickets, totalTickets, availableTickets, enabled);enabled
 
                 int quantity = rs.getInt("quantity");
                 cartItems.add(new CartItems(event, quantity));

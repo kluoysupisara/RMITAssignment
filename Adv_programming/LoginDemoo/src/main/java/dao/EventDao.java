@@ -24,12 +24,13 @@ public class EventDao {
              Statement stmt = conn.createStatement();) {
             String sql = "CREATE TABLE IF NOT EXISTS " + TABLE_NAME
                     + "( id INTEGER PRIMARY KEY AUTOINCREMENT,"
-                    + "eventName TEXT,"
-                    + "venue TEXT,"
-                    + "day TEXT,"
-                    + "price REAL,"
-                    + "sold INT,"
-                    + "Total INT);";
+                    + "eventName TEXT, "
+                    + "venue TEXT, "
+                    + "day TEXT, "
+                    + "price REAL, "
+                    + "sold INT, "
+                    + "Total INT, "
+                    + "enabled INTEGER DEFAULT 1);";
 
             stmt.executeUpdate(sql);
             System.out.println("Table '" + TABLE_NAME + "' checked/created successfully.");
@@ -57,7 +58,7 @@ public class EventDao {
             BufferedReader br = new BufferedReader(new FileReader(filePath));
             String line;
             String sql = "INSERT INTO " + TABLE_NAME
-                    + " (eventName, venue, day, price, sold, total) "
+                    + " (eventName, venue, day, price, sold, total, enabled) "
                     + "VALUES (?, ?, ?, ?, ?, ?);";
             PreparedStatement pstmt = conn.prepareStatement(sql);
             while ((line = br.readLine()) != null) {
@@ -98,28 +99,14 @@ public class EventDao {
                     .map(day -> "'" + day.trim() + "'")
                     .collect(Collectors.joining(", "));
 
-            String query = "SELECT * FROM " + TABLE_NAME + " WHERE day IN (" + inClause +" )";
-            System.out.println("query: " + query);
+            String query = "SELECT * FROM " + TABLE_NAME + " WHERE day IN (" + inClause +" ) AND enabled = 1";
+            //System.out.println("query: " + query);
 
             ResultSet rs = stmt.executeQuery(query);
             //System.out.println("rs size: "+ rs.toString());;
 
             while (rs.next()) {
-                int total = rs.getInt("total");
-                int sold = rs.getInt("sold");
-                int available = total - sold;
-                String day = rs.getString("day");
-                Event event = new Event(
-                        rs.getInt("id"),
-                        rs.getString("eventName"),
-                        rs.getString("venue"),
-                        day,
-                        rs.getDouble("price"),
-                        sold,
-                        total,
-                        available
-                );
-                events.add(event);
+                events.add(buildEventFromResultSet(rs));
             }
 
         } catch (Exception e) {
@@ -150,16 +137,7 @@ public class EventDao {
             ResultSet rs = stmt.executeQuery();
 
             if (rs.next()) {
-                int id = rs.getInt("id");
-                String eventName = rs.getString("eventName");
-                String venue = rs.getString("venue");
-                String day = rs.getString("day");
-                double price = rs.getDouble("price");
-                int sold = rs.getInt("sold");
-                int total = rs.getInt("total");
-                int available = total - sold;
-
-                return new Event(id, eventName, venue, day, price, sold, total, available);
+                return buildEventFromResultSet(rs);
             }
         } catch (SQLException e) {
             System.out.println("Error getting event by ID: " + e.getMessage());
@@ -180,24 +158,15 @@ public class EventDao {
 
     public List<Event> getAllEvents() {
         List<Event> events = new ArrayList<>();
-        String query = "SELECT * FROM " + TABLE_NAME + " ORDER BY event_name, venue, day";
+        String query = "SELECT * FROM " + TABLE_NAME + " ORDER BY eventName, venue, day";
+        System.out.println("query getAllEvents: " + query);
 
         try (Connection con = Database.getConnection();
              PreparedStatement stmt = con.prepareStatement(query);
              ResultSet rs = stmt.executeQuery()) {
 
             while (rs.next()) {
-                int id = rs.getInt("id");
-                String name = rs.getString("event_name");
-                String venue = rs.getString("venue");
-                String day = rs.getString("day");
-                double price = rs.getDouble("price");
-                int soldTickets = rs.getInt("sold_tickets");
-                int totalTickets = rs.getInt("total_tickets");
-                boolean enabled = rs.getBoolean("enabled");
-
-                Event event = new Event(id, name, venue, day, price, soldTickets, totalTickets, enabled);
-                events.add(event);
+                events.add(buildEventFromResultSet(rs));
             }
 
         } catch (SQLException e) {
@@ -206,8 +175,86 @@ public class EventDao {
 
         return events;
     }
+    protected Event buildEventFromResultSet(ResultSet rs) throws SQLException {
+        int id = rs.getInt("id");
+        String name = rs.getString("eventName");
+        String venue = rs.getString("venue");
+        String day = rs.getString("day");
+        double price = rs.getDouble("price");
+        int soldTickets = rs.getInt("sold");
+        int totalTickets = rs.getInt("total");
+        int availableTickets = totalTickets - soldTickets;
+        boolean enabled = rs.getInt("enabled") == 1;
 
+        return new Event(id, name, venue, day, price, soldTickets, totalTickets, availableTickets, enabled);
+    }
 
+    public void updateEvent(Event updatedEvent) {
+        String sql = "UPDATE events SET eventName = ?, venue = ?, day = ?, price = ? WHERE id = ?";
 
+        try (Connection conn = Database.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, updatedEvent.getEventName());
+            stmt.setString(2, updatedEvent.getVenue());
+            stmt.setString(3, updatedEvent.getDay());
+            stmt.setDouble(4, updatedEvent.getPrice());
+            stmt.setInt(5, updatedEvent.getId());
+
+            int rowsAffected = stmt.executeUpdate();
+            System.out.println("Updated event ID " + updatedEvent.getId() + " (" + rowsAffected + " row(s) affected)");
+
+        } catch (SQLException e) {
+            System.err.println("Error updating event: " + e.getMessage());
+        }
+    }
+    public void deleteEvent(int eventId) {
+        String sql = "DELETE FROM events WHERE id = ?";
+
+        try (Connection conn = Database.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, eventId);
+            int rowsAffected = stmt.executeUpdate();
+            System.out.println("Deleted event ID " + eventId + " (" + rowsAffected + " row(s) affected)");
+
+        } catch (SQLException e) {
+            System.err.println("Error deleting event: " + e.getMessage());
+        }
+    }
+    public boolean isDuplicateEvent(String eventName, String venue, String day) {
+        String sql = "SELECT COUNT(*) FROM events WHERE eventName = ? AND venue = ? AND day = ? ";
+        try (Connection con = Database.getConnection();
+             PreparedStatement stmt = con.prepareStatement(sql)) {
+
+            stmt.setString(1, eventName);
+            stmt.setString(2, venue);
+            stmt.setString(3, day);
+
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1) > 0; // true = duplicate found
+            }
+        } catch (SQLException e) {
+            System.err.println("Error checking duplicate event: " + e.getMessage());
+        }
+        return false;
+    }
+
+    public void insertEvent(String name, String venue, String day, double price, int total) {
+        String sql = "INSERT INTO events (eventName, venue, day, price, sold, total, enabled) VALUES (?, ?, ?, ?, 0, ?, 1)";
+        try (Connection con = Database.getConnection();
+             PreparedStatement stmt = con.prepareStatement(sql)) {
+            stmt.setString(1, name);
+            stmt.setString(2, venue);
+            stmt.setString(3, day);
+            stmt.setDouble(4, price);
+            stmt.setInt(5, total);
+
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            System.err.println("Error inserting event: " + e.getMessage());
+        }
+    }
 }
 
