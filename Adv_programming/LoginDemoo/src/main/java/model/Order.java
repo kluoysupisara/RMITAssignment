@@ -32,7 +32,7 @@ public class Order {
     public void setOrderNumber(String orderNumber) {
         this.orderNumber = orderNumber;
     }
-    public String getUser_name() {
+    public String getUsername() {
         return user_name;
     }
     public void setUser_name(String user_name) {

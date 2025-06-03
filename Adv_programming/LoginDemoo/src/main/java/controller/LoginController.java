@@ -45,10 +45,11 @@ public class LoginController {
 	
 	@FXML
 	public void initialize() {		
-		login.setOnAction(event -> handleLogin());
-		
-		signup.setOnAction(event -> handleSignup());
+//		login.setOnAction(event -> handleLogin());
+//
+//		signup.setOnAction(event -> handleSignup());
 	}
+	@FXML
 	private void handleLogin() {
 		if (!name.getText().isEmpty() && !password.getText().isEmpty()) {
 			User user;
@@ -74,6 +75,7 @@ public class LoginController {
 		name.clear();
 		password.clear();
 	}
+	@FXML
 	private void handleSignup() {
 		try {
 			FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/SignupView.fxml"));
@@ -104,6 +106,22 @@ public class LoginController {
 			VBox root = loader.load();
 
 			homeController.showStage(root);
+			stage.close();
+		} catch (IOException e) {
+			message.setText(e.getMessage());
+			System.out.println(e.getMessage());
+		}
+	}
+
+	private  void loadAdminDashboardStage() {
+		try {
+			FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/AdminDashBoard.fxml"));
+			HomeController controller = new HomeController(stage, model);
+
+			loader.setController(controller);
+			VBox root = loader.load();
+
+			controller.showStage(root);
 			stage.close();
 		} catch (IOException e) {
 			message.setText(e.getMessage());

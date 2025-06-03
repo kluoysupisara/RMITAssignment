@@ -167,5 +167,47 @@ public class EventDao {
         return null;
     }
 
+    public void setEventEnabled(int eventId, boolean enabled) {
+        String sql = "UPDATE " + TABLE_NAME +" SET enabled = ? WHERE id = ?";
+        try (Connection con = Database.getConnection(); PreparedStatement stmt = con.prepareStatement(sql)) {
+            stmt.setInt(1, enabled ? 1 : 0);
+            stmt.setInt(2, eventId);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public List<Event> getAllEvents() {
+        List<Event> events = new ArrayList<>();
+        String query = "SELECT * FROM " + TABLE_NAME + " ORDER BY event_name, venue, day";
+
+        try (Connection con = Database.getConnection();
+             PreparedStatement stmt = con.prepareStatement(query);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                int id = rs.getInt("id");
+                String name = rs.getString("event_name");
+                String venue = rs.getString("venue");
+                String day = rs.getString("day");
+                double price = rs.getDouble("price");
+                int soldTickets = rs.getInt("sold_tickets");
+                int totalTickets = rs.getInt("total_tickets");
+                boolean enabled = rs.getBoolean("enabled");
+
+                Event event = new Event(id, name, venue, day, price, soldTickets, totalTickets, enabled);
+                events.add(event);
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Error fetching all events: " + e.getMessage());
+        }
+
+        return events;
+    }
+
+
+
 }
 

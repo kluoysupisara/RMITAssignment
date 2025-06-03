@@ -9,9 +9,10 @@ public class Event {
     private int soldTickets;
     private int totalTickets;
     private int availableTickets;
+    private int enabled;
 
 
-    public Event(int id, String eventName, String venue, String day, double price, int soldTickets, int totalTickets, int availableTickets) {
+    public Event(int id, String eventName, String venue, String day, double price, int soldTickets, int totalTickets, int availableTickets, int enabled) {
         this.id = id;
         this.eventName = eventName;
         this.venue = venue;
@@ -20,6 +21,7 @@ public class Event {
         this.soldTickets = soldTickets;
         this.totalTickets = totalTickets;
         this.availableTickets = availableTickets;
+        this.enabled = enabled;
     }
 
     public int getId() {
@@ -52,5 +54,11 @@ public class Event {
     }
     public void setTotalTickets(int totalTickets) {
         this.totalTickets = totalTickets;
+    }
+    public int getEnabled() {
+        return enabled;
+    }
+    public void setEnabled(int enabled) {
+        this.enabled = enabled;
     }
 }

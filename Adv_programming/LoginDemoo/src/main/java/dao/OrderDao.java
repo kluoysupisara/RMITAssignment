@@ -107,6 +107,50 @@ public class OrderDao {
             e.printStackTrace();
         }
     }
+    public List<Order> getAllOrders() {
+        List<Order> orders = new ArrayList<>();
+
+        String fetchOrders = "SELECT * FROM " + ORDER_TABLE + " ORDER BY order_date DESC";
+        String fetchItems = "SELECT * FROM " + ORDER_ITEMS_TABLE + " WHERE order_id = ?";
+
+        try (Connection con = Database.getConnection();
+             PreparedStatement orderStmt = con.prepareStatement(fetchOrders)) {
+
+            ResultSet orderRs = orderStmt.executeQuery();
+
+            while (orderRs.next()) {
+                int orderId = orderRs.getInt("id");
+                String orderNumber = orderRs.getString("order_number");
+                String username = orderRs.getString("user_name");
+                String orderDateStr = orderRs.getString("order_date");
+                LocalDateTime orderDate = LocalDateTime.parse(orderDateStr, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+                double totalPrice = orderRs.getDouble("total_price");
+
+                // Fetch order items
+                List<CartItems> items = new ArrayList<>();
+                try (PreparedStatement itemStmt = con.prepareStatement(fetchItems)) {
+                    itemStmt.setInt(1, orderId);
+                    ResultSet itemRs = itemStmt.executeQuery();
+
+                    while (itemRs.next()) {
+                        int eventId = itemRs.getInt("event_id");
+                        int quantity = itemRs.getInt("quantity");
+
+                        Event event = new EventDao().getEventById(eventId); // Load full event info
+                        items.add(new CartItems(event, quantity));
+                    }
+                }
+
+                Order order = new Order(orderId, orderNumber, username, orderDate, items, totalPrice);
+                orders.add(order);
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Error fetching all orders: " + e.getMessage());
+        }
+
+        return orders;
+    }
 
     public List<Order> getOrdersByUser(String userName) {
         List<Order> orders = new ArrayList<>();
