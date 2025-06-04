@@ -77,22 +77,20 @@ public class PaymentController {
         String username = model.getCurrentUser().getUsername(); // get username
         OrderDao  orderDao = model.getOrderDao(); // get orderDao
         LocalDateTime orderDate = LocalDateTime.now();
-        // Generate 4- digit order number for this order
-        String orderNumber = orderDao.generateNextOrderNumberForUser(username);
         // ✅ Clone items to avoid being cleared later
         List<CartItems> cartItems = new ArrayList<>(model.getShoppingCart().getItems());
 
 
 
         // Save Order into OrderDB
-        int orderId = orderDao.saveOrder(orderNumber, username, orderDate, totalPrice);
+        int orderId = orderDao.saveOrder(username, orderDate, totalPrice);
         if (orderId == -1) {
             message.setText("Failed to place order.");
             return;
         }
 
         //create Order object
-        Order order = new Order(orderId, orderNumber, username, orderDate, cartItems, totalPrice);
+        Order order = new Order(orderId, username, orderDate, cartItems, totalPrice);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"); // More readable
         String formattedDate = orderDate.format(formatter);
 
@@ -101,7 +99,6 @@ public class PaymentController {
         // ✅ Print confirmation to terminal
         System.out.println("\n✅ New Order Saved:");
         System.out.println("Order ID: " + orderId);
-        System.out.println("Order Number: " + orderNumber);
         System.out.println("Username: " + username);
         System.out.println("Order Date: " + formattedDate);
         System.out.println("Total Price: $" + totalPrice);

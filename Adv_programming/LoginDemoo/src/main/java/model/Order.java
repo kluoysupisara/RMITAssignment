@@ -6,15 +6,13 @@ import java.util.stream.Collectors;
 
 public class Order {
     private int orderId;
-    private String orderNumber;
     private String user_name;
     private LocalDateTime orderDate;
     private List<CartItems> items;
     private double orderPrice;
 
-    public Order(int orderId, String orderNumber, String user_name, LocalDateTime orderDate, List<CartItems> items, double orderPrice) {
+    public Order(int orderId, String user_name, LocalDateTime orderDate, List<CartItems> items, double orderPrice) {
         this.orderId = orderId;
-        this.orderNumber = orderNumber;
         this.user_name = user_name;
         this.orderDate = orderDate;
         this.items = items;
@@ -25,12 +23,6 @@ public class Order {
     }
     public void setOrderId(int orderId) {
         this.orderId = orderId;
-    }
-    public String getOrderNumber() {
-        return orderNumber;
-    }
-    public void setOrderNumber(String orderNumber) {
-        this.orderNumber = orderNumber;
     }
     public String getUsername() {
         return user_name;
@@ -61,5 +53,8 @@ public class Order {
         return items.stream()
                 .map(item -> "- " + item.getEvent().getEventName() + " x" + item.getQuantity())
                 .collect(Collectors.joining("\n"));
+    }
+    public String getFormattedOrderId() {
+        return String.format("%04d", orderId);
     }
 }

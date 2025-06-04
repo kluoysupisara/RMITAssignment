@@ -19,7 +19,6 @@ public class OrderDao {
             // Create orders table
             String createOrders = "CREATE TABLE IF NOT EXISTS " + ORDER_TABLE + " ("
                     + "id INTEGER PRIMARY KEY AUTOINCREMENT,"
-                    + "order_number TEXT NOT NULL,"
                     + "user_name TEXT NOT NULL,"
                     + "order_date TEXT NOT NULL,"
                     + "total_price REAL NOT NULL"
@@ -62,9 +61,9 @@ public class OrderDao {
         return "0001"; // First order for this user
     }
 
-    public int saveOrder(String orderNumber, String username, LocalDateTime orderDate, double totalPrice) {
-        String insertOrder = "INSERT INTO " + ORDER_TABLE + " (order_number, user_name, order_date, total_price) VALUES (?, ?, ?, ?)";
-        String insertOrderItem = "INSERT INTO " + ORDER_ITEMS_TABLE + " (order_id, event_id, quantity) VALUES (?, ?, ?)";
+    public int saveOrder(String username, LocalDateTime orderDate, double totalPrice) {
+        String insertOrder = "INSERT INTO " + ORDER_TABLE + " (user_name, order_date, total_price) VALUES (?, ?, ?)";
+        //String insertOrderItem = "INSERT INTO " + ORDER_ITEMS_TABLE + " (order_id, event_id, quantity) VALUES (?, ?, ?)";
 
         try (Connection con = Database.getConnection()) {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"); // More readable
@@ -72,10 +71,9 @@ public class OrderDao {
 
             // Insert order
             PreparedStatement orderStmt = con.prepareStatement(insertOrder, Statement.RETURN_GENERATED_KEYS);
-            orderStmt.setString(1, orderNumber);
-            orderStmt.setString(2, username);
-            orderStmt.setString(3, formattedDate);
-            orderStmt.setDouble(4, totalPrice);
+            orderStmt.setString(1, username);
+            orderStmt.setString(2, formattedDate);
+            orderStmt.setDouble(3, totalPrice);
             orderStmt.executeUpdate();
 
             ResultSet generatedKeys = orderStmt.getGeneratedKeys();
@@ -84,6 +82,7 @@ public class OrderDao {
                 return orderId;
             }
         } catch (SQLException e) {
+            System.err.println("Error saving order: " + e.getMessage());
             e.printStackTrace();
         }
 
@@ -100,6 +99,7 @@ public class OrderDao {
                     stmt.setInt(2, item.getEvent().getId());     // event ID
                     stmt.setInt(3, item.getQuantity());          // quantity
                     stmt.executeUpdate();
+                    System.out.println(stmt.toString());
                 }
             }
         } catch (SQLException e) {
@@ -120,7 +120,6 @@ public class OrderDao {
 
             while (orderRs.next()) {
                 int orderId = orderRs.getInt("id");
-                String orderNumber = orderRs.getString("order_number");
                 String username = orderRs.getString("user_name");
                 String orderDateStr = orderRs.getString("order_date");
                 LocalDateTime orderDate = LocalDateTime.parse(orderDateStr, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
@@ -141,7 +140,7 @@ public class OrderDao {
                     }
                 }
 
-                Order order = new Order(orderId, orderNumber, username, orderDate, items, totalPrice);
+                Order order = new Order(orderId, username, orderDate, items, totalPrice);
                 orders.add(order);
             }
 
@@ -164,7 +163,6 @@ public class OrderDao {
 
             while (orderRs.next()) {
                 int orderId = orderRs.getInt("id");
-                String orderNumber = orderRs.getString("order_number");
                 String dateString = orderRs.getString("order_date");
                 LocalDateTime orderDate = LocalDateTime.parse(dateString, formatter);
                 double totalPrice = orderRs.getDouble("total_price");
@@ -181,7 +179,7 @@ public class OrderDao {
                     items.add(new CartItems(event, qty));
                 }
 
-                Order order = new Order(orderId, orderNumber, userName, orderDate, items, totalPrice);
+                Order order = new Order(orderId, userName, orderDate, items, totalPrice);
                 orders.add(order);
             }
         } catch (SQLException e) {
@@ -194,7 +192,7 @@ public class OrderDao {
     public void exportOrdersToFile(List<Order> orders, File file) {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
             for (Order order : orders) {
-                writer.write("Order Number: " + order.getOrderNumber());
+                writer.write("Order Number: " + order.getFormattedOrderId());
                 writer.newLine();
                 writer.write("Date & Time: " + order.getOrderDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
                 writer.newLine();

@@ -8,15 +8,15 @@ import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import model.Event;
-import model.GroupedEvent;
-import model.Model;
-import model.Order;
+import model.*;
 import util.AlertUtils;
 import util.StageUtils;
 
+import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
@@ -44,7 +44,7 @@ public class AdminDashboardController {
     @FXML private TableColumn<Order, String> usernameColumn;
     @FXML private TableColumn<Order, String> orderDateColumn;
     @FXML private TableColumn<Order, String> totalColumn;
-    @FXML private TableColumn<Order, Void> itemsColumn;
+    @FXML private TableColumn<Order, String> itemsColumn;
 
     private Stage stage;
     private Stage parentStage;
@@ -198,13 +198,14 @@ public class AdminDashboardController {
 
     private void setupOrderTable() {
         orderNumberColumn.setCellValueFactory(data -> javafx.beans.binding.Bindings.createStringBinding(
-                data.getValue()::getOrderNumber));
+                data.getValue()::getFormattedOrderId));
         usernameColumn.setCellValueFactory(data -> javafx.beans.binding.Bindings.createStringBinding(
                 data.getValue()::getUsername));
         orderDateColumn.setCellValueFactory(data -> javafx.beans.binding.Bindings.createStringBinding(
                 () -> data.getValue().getOrderDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))));
         totalColumn.setCellValueFactory(data -> javafx.beans.binding.Bindings.createStringBinding(
                 () -> String.format("$%.2f", data.getValue().getOrderPrice())));
+        itemsColumn.setCellValueFactory(data -> javafx.beans.binding.Bindings.createStringBinding(data.getValue()::getEventSummary));
 
         refreshOrderData();
     }
@@ -252,6 +253,40 @@ public class AdminDashboardController {
     @FXML
     private void handleExportOrders() {
         AlertUtils.showInfo("Export Orders", "This will export all orders to a file.", stage);
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Export Orders");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Text Files", "*.txt"));
+
+        // Suggest a default filename like orders-username.txt
+        String username = model.getCurrentUser().getUsername();
+        fileChooser.setInitialFileName("orders-" + username + ".txt");
+
+        File selectedFile = fileChooser.showSaveDialog(stage);
+        if (selectedFile != null) {
+            exportOrdersToFile(selectedFile, username);
+        }
+    }
+    private void exportOrdersToFile(File file, String username) {
+        try (PrintWriter writer = new PrintWriter(file)) {
+            List<Order> orders = model.getOrderDao().getAllOrders();
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+
+            for (Order order : orders) {
+                writer.println("Order Number: " + order.getFormattedOrderId());
+                writer.println("Date: " + order.getOrderDate().format(formatter));
+                writer.println("Event x quantity: ");
+                for (CartItems item : order.getItems()) {
+                    writer.printf("  - %s x%d\n", item.getEvent().getEventName(), item.getQuantity());
+                }
+                writer.printf("Total Price: $%.2f\n", order.getOrderPrice());
+                writer.println("--------------------------------------------------");
+            }
+
+            AlertUtils.showInfo("Export Successful", "Orders exported to:\n" + file.getAbsolutePath(), stage);
+
+        } catch (IOException e) {
+            AlertUtils.showError("Export Failed", "Could not write to file:\n" + e.getMessage(), stage);
+        }
     }
     private void setupEnabledColumn() {
         enabledColumn.setCellFactory(column -> new TableCell<>() {
@@ -340,9 +375,9 @@ public class AdminDashboardController {
                     GroupedEvent grouped = getTableView().getItems().get(getIndex());
                     Event selectedEvent = grouped.getSelectedEvent();
 
-                    boolean disable = (selectedEvent == null || !selectedEvent.getEnabled());
-                    editButton.setOpacity(1);
-                    deleteButton.setOpacity(1);
+                    //boolean disable = (selectedEvent == null || !selectedEvent.getEnabled());
+                    //editButton.setOpacity(1);
+                    //deleteButton.setOpacity(1);
                     //editButton.setDisable(disable);
                     //deleteButton.setDisable(disable);
 
@@ -432,9 +467,15 @@ public class AdminDashboardController {
      */
     @FXML
     private void handleLogout() {
-        model.logout();
-        parentStage.show();
-        stage.close();
+        boolean confirm = AlertUtils.showConfirmation("Logout Confirmation",
+                "Are you sure you want to logout?",
+                stage);
+
+        if (confirm) {
+            model.logout(); // clear username amd shoppingCart memory
+            parentStage.show(); // comeback to loginView
+            stage.close();
+        }
     }
 
     public void showStage(Pane root) {

@@ -46,7 +46,7 @@ public class OrderHistoryController {
         List<Order> orders = orderDao.getOrdersByUser(username);
         ObservableList<Order> observableOrders = FXCollections.observableArrayList(orders);
 
-        orderColumn.setCellValueFactory(data -> javafx.beans.binding.Bindings.createStringBinding(data.getValue()::getOrderNumber));
+        orderColumn.setCellValueFactory(data -> javafx.beans.binding.Bindings.createStringBinding(data.getValue()::getFormattedOrderId));
         dateColumn.setCellValueFactory(data -> javafx.beans.binding.Bindings.createStringBinding(() ->
                 data.getValue().getOrderDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))));
         eventColumn.setCellValueFactory(data -> javafx.beans.binding.Bindings.createStringBinding(data.getValue()::getEventSummary));
@@ -77,7 +77,7 @@ public class OrderHistoryController {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
             for (Order order : orders) {
-                writer.println("Order Number: " + order.getOrderNumber());
+                writer.println("Order Number: " + order.getFormattedOrderId());
                 writer.println("Date: " + order.getOrderDate().format(formatter));
                 writer.println("Event x quantity: ");
                 for (CartItems item : order.getItems()) {

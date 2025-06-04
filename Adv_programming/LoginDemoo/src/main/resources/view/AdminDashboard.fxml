@@ -90,8 +90,8 @@
                      <top>
                         <ButtonBar prefHeight="40.0" prefWidth="200.0" BorderPane.alignment="TOP_CENTER">
                            <buttons>
-                              <Button defaultButton="true" mnemonicParsing="false" text="Export All" />
-                              <Button mnemonicParsing="false" text="Refresh" />
+                              <Button defaultButton="true" mnemonicParsing="false" onAction="#handleExportOrders" text="Export All" />
+                              <Button mnemonicParsing="false" onAction="#handleRefreshOrders" text="Refresh" />
                            </buttons>
                            <BorderPane.margin>
                               <Insets right="10.0" />
