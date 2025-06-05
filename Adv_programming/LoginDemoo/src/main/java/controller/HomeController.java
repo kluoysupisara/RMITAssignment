@@ -156,6 +156,30 @@ public class HomeController {
 		stage.close();
 
 	}
+	@FXML
+	private void handleChangePassword() {
+		try {
+			FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/ChangePasswordPopup.fxml"));
+
+			Stage popup = new Stage();
+			popup.initOwner(stage);
+
+			ChangePasswordController controller = new ChangePasswordController(model);
+			controller.setStage(popup);
+			loader.setController(controller);
+
+			GridPane root = loader.load();
+
+			// Refresh eventsTable after popup closes
+			//popup.setOnHiding(event -> refreshEventTable());
+
+			controller.showStage(root);
+
+		} catch (IOException e) {
+			AlertUtils.showError("Load Error", "Unable to load Add Event window.", stage);
+		}
+
+	}
 
 	@FXML
 	private void handleLogout() throws IOException {

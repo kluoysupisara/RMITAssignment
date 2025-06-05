@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 import model.User;
+import util.PasswordUtils;
 
 public class UserDaoImpl implements UserDao {
 	private final String TABLE_NAME = "users";
@@ -25,7 +26,8 @@ public class UserDaoImpl implements UserDao {
 	}
 
 	@Override
-	public User getUser(String username, String password) throws SQLException {
+	public User getUser(String username, String plainPassword) throws SQLException {
+		String password =  PasswordUtils.encrypt(plainPassword);
 		String sql = "SELECT * FROM " + TABLE_NAME + " WHERE username = ? AND password = ?";
 		try (Connection connection = Database.getConnection(); 
 				PreparedStatement stmt = connection.prepareStatement(sql);) {
@@ -51,12 +53,22 @@ public class UserDaoImpl implements UserDao {
 		try (Connection connection = Database.getConnection();
 				PreparedStatement stmt = connection.prepareStatement(sql);) {
 			stmt.setString(1, username);
-			stmt.setString(2, password);
+			stmt.setString(2, PasswordUtils.encrypt(password)); //  Encrypt before saving
 			stmt.setString(3, preferred_name);
 
 
 			stmt.executeUpdate();
 			return new User(username, password, preferred_name);
 		} 
+	}
+	@Override
+	public void updatePassword(String username, String encryptedPassword) throws SQLException {
+		String sql = "UPDATE users SET password = ? WHERE username = ?";
+		try (Connection con = Database.getConnection(); PreparedStatement stmt = con.prepareStatement(sql)) {
+			stmt.setString(1, encryptedPassword);
+			stmt.setString(2, username);
+			stmt.executeUpdate();
+			System.out.println(stmt.toString());
+		}
 	}
 }
