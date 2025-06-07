@@ -138,7 +138,11 @@ public class ShoppingCartController {
             {
                 removeBtn.setOnAction(e -> {
                     CartItems item = getTableView().getItems().get(getIndex());
-                    model.getShoppingCart().removeItem(item.getEvent());
+                    try {
+                        model.getShoppingCart().removeItem(item.getEvent());
+                    } catch (SQLException ex) {
+                        throw new RuntimeException(ex);
+                    }
                     cartTable.getItems().remove(item);
                     updateTotal();
                 });

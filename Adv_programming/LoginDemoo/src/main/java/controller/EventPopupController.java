@@ -12,6 +12,8 @@ import model.ShoppingCart;
 import util.AlertUtils;
 import util.StageUtils;
 
+import java.sql.SQLException;
+
 public class EventPopupController {
 
     @FXML private Label eventNameLabel;
@@ -37,7 +39,13 @@ public class EventPopupController {
     @FXML
     private void initialize() {
         setEvent(event);
-        addToCartButton.setOnAction(e -> handleAddToCart());
+        addToCartButton.setOnAction(e -> {
+            try {
+                handleAddToCart();
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
+        });
         cancelButton.setOnAction(e -> {handleCancel();});
     }
 
@@ -53,7 +61,7 @@ public class EventPopupController {
     }
 
     @FXML
-    public void handleAddToCart() {
+    public void handleAddToCart() throws SQLException {
         int quantity = quantitySpinner.getValue();
         int available = event.getAvailableTickets();
 

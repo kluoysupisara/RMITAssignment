@@ -77,4 +77,8 @@ public class Event {
     public void setPrice(double v) {
         this.price = v;
     }
+
+    public void setId(int i) {
+        this.id = i;
+    }
 }

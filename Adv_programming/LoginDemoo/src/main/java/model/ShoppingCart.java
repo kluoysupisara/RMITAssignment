@@ -1,8 +1,11 @@
 package model;
 
 import dao.ShoppingCartDao;
+import dao.ShoppingCartDaoImpl;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+
+import java.sql.SQLException;
 
 public class ShoppingCart {
     private final ObservableList<CartItems> items = FXCollections.observableArrayList();
@@ -18,7 +21,7 @@ public class ShoppingCart {
         return items;
     }
 
-    public void addItem(Event event, int quantityToAdd) {
+    public void addItem(Event event, int quantityToAdd) throws SQLException {
         //ShoppingCartDao dao = model.getshoppingCartDao();
         for (CartItems item : items) {
             if (item.getEvent().getId() == event.getId()) {
@@ -33,13 +36,13 @@ public class ShoppingCart {
     }
 
 
-    public void removeItem(Event event) {
+    public void removeItem(Event event) throws SQLException {
         items.removeIf(item -> item.getEvent().getId() == event.getId());
         dao.removeItem(userName, event.getId()); // auto-remove from DB
 
     }
     // clear all cart and DB
-    public void clear() {
+    public void clear() throws SQLException {
         items.clear();
         dao.clearCart(userName); // auto-clear from DB
     }

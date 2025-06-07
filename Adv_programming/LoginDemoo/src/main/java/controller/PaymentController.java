@@ -13,6 +13,7 @@ import model.Order;
 import util.AlertUtils;
 import util.StageUtils;
 
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -39,7 +40,7 @@ public class PaymentController {
     }
 
     @FXML
-    private void handleConfirm() {
+    private void handleConfirm() throws SQLException {
         String code = codeField.getText().trim();
         if (!code.matches("\\d{6}")) {
             message.setText("Please enter a valid 6-digit code.");
@@ -52,7 +53,7 @@ public class PaymentController {
         processPayment();
 
     }
-    private void processPayment() {
+    private void processPayment() throws SQLException {
         AlertUtils.showInfo("Payment Successful", "Your order has been confirmed.", stage);
 
         //insert to OrderDao DB
