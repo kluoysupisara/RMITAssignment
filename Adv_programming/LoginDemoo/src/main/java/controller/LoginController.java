@@ -21,6 +21,7 @@ import model.CartItems;
 import model.Model;
 import model.ShoppingCart;
 import model.User;
+import util.PasswordUtils;
 import util.StageUtils;
 
 public class LoginController {
@@ -170,7 +171,8 @@ public class LoginController {
 		return !name.getText().isEmpty() && !password.getText().isEmpty();
 	}
 	private boolean isAdmin(User user) {
-		return user.getUsername().equals("admin") && user.getPassword().equals("Admin321");
+		String decryptedPassword = PasswordUtils.decrypt(user.getPassword());
+		return user.getUsername().equals("admin") && decryptedPassword.equals("Admin321");
 	}
 	private void showErrorMessage(String msg) {
 		message.setText(msg);
